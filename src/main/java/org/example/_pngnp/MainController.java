@@ -9,7 +9,7 @@ public class MainController {
     private ImageModel model;
     private Stage primaryStage;
 
-    public void setImageModal(ImageModel model, Stage primaryStage) {
+    public void initialize(ImageModel model, Stage primaryStage) {
         this.model = model;
         this.primaryStage = primaryStage;
     }
@@ -31,11 +31,6 @@ public class MainController {
 
     @FXML
     private Button sobelButton;
-
-    public void initialize(ImageModel model, Stage primaryStage) {
-        this.model = model;
-        this.primaryStage = primaryStage;
-    }
 
     @FXML
     private void loadImage() {
