@@ -9,18 +9,18 @@ import java.io.IOException;
 
 public class HelloApplication extends Application {
     @Override
-    public void start(Stage stage) throws IOException {
-        //
+    public void start(Stage primaryStage) throws Exception {
         ImageModel model = new ImageModel();
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Parent root = loader.load();
         MainController controller = loader.getController();
-        controller.initialize(model, stage);
-        //
-        Scene scene = new Scene(root, 1024, 768);
-        stage.setTitle("Title");
-        stage.setScene(scene);
-        stage.show();
+        controller.setImageModal(model, primaryStage);
+
+        Scene scene = new Scene(root, 800, 600);
+        primaryStage.setTitle("Image Editor");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 
     public static void main(String[] args) {

@@ -9,6 +9,11 @@ public class MainController {
     private ImageModel model;
     private Stage primaryStage;
 
+    public void setImageModal(ImageModel model, Stage primaryStage) {
+        this.model = model;
+        this.primaryStage = primaryStage;
+    }
+
     @FXML
     private ImageView imageView;
 

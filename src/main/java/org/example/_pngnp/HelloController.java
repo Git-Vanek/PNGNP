@@ -10,12 +10,4 @@ public class HelloController {
     protected void onHelloButtonClick() {
         welcomeText.setText("Welcome to JavaFX Application!");
     }
-
-    private ImageModel imageModel;
-
-    public void setImage(ImageModel image) {
-        this.imageModel = image;
-        //firstNameField.textProperty().bindBidirectional(image.firstNameProperty());
-        //lastNameField.textProperty().bindBidirectional(image.lastNameProperty());
-    }
 }
