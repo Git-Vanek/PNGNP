@@ -25,7 +25,6 @@ public class ImageModel {
 
     public void applyMedianFilter(int size) {
         image = applyFilter((x, y, color) -> {
-            // Implement median filter logic
             return color;
         });
     }
@@ -39,7 +38,6 @@ public class ImageModel {
 
     public void applySobelFilter() {
         image = applyFilter((x, y, color) -> {
-            // Implement Sobel filter logic
             return color;
         });
     }
