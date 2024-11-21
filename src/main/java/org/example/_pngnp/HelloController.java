@@ -1,5 +1,6 @@
 package org.example._pngnp;
 
+import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class HelloController {
 
@@ -16,13 +18,19 @@ public class HelloController {
 
     @FXML
     public void initialize() {
-        // Загрузка логотипа из папки res
+        // Загрузка логотипа из папки resources
         Image logoImage = new Image(getClass().getResourceAsStream("/images/logo.png"));
         logoImageView.setImage(logoImage);
+
+        // Анимация появления логотипа
+        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(2), logoImageView);
+        fadeTransition.setFromValue(0.0);
+        fadeTransition.setToValue(1.0);
+        fadeTransition.play();
     }
 
     @FXML
-    protected void onHelloButtonClick(ActionEvent event) {
+    protected void onStartButtonClick(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
             Parent root = loader.load();
