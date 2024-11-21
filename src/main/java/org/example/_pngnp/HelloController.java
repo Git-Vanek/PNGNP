@@ -10,9 +10,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class HelloController {
 
+    private static final Logger logger = LogManager.getLogger(HelloController.class);
     @FXML
     private ImageView logoImageView;
 
@@ -21,7 +24,8 @@ public class HelloController {
         // Загрузка логотипа из папки resources
         Image logoImage = new Image(getClass().getResourceAsStream("/images/logo.png"));
         logoImageView.setImage(logoImage);
-
+        // Запись в лог
+        logger.info("Logo loaded");
         // Анимация появления логотипа
         FadeTransition fadeTransition = new FadeTransition(Duration.seconds(2), logoImageView);
         fadeTransition.setFromValue(0.0);
