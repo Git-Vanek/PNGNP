@@ -12,7 +12,7 @@ public class HelloApplication extends Application {
         // Настройка окна
         FXMLLoader loader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
         Parent root = loader.load();
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1200, 800);
         primaryStage.setTitle("PNGNP");
         primaryStage.setScene(scene);
         // Отключаем возможность изменения размера окна

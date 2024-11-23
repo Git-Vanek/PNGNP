@@ -1,4 +1,5 @@
 package org.example._pngnp;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -25,6 +26,7 @@ public class ImageModel {
 
     public void applyMedianFilter(int size) {
         image = applyFilter((x, y, color) -> {
+            // Implement median filter logic
             return color;
         });
     }
@@ -38,6 +40,7 @@ public class ImageModel {
 
     public void applySobelFilter() {
         image = applyFilter((x, y, color) -> {
+            // Implement Sobel filter logic
             return color;
         });
     }

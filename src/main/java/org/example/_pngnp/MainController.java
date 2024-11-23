@@ -1,7 +1,14 @@
 package org.example._pngnp;
+
 import javafx.fxml.FXML;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -9,39 +16,55 @@ public class MainController {
     private ImageModel model;
     private Stage primaryStage;
 
-    public void initialize(ImageModel model, Stage primaryStage) {
-        this.model = model;
-        this.primaryStage = primaryStage;
-    }
-
     @FXML
     private ImageView imageView;
 
     @FXML
-    private Button loadButton;
+    private Canvas canvas;
 
     @FXML
-    private Button grayscaleButton;
+    private Slider brushSizeSlider;
 
     @FXML
-    private Button medianButton;
+    private ColorPicker brushColorPicker;
 
-    @FXML
-    private Button thresholdButton;
+    private GraphicsContext gc;
+    private double lastX, lastY;
 
-    @FXML
-    private Button sobelButton;
+    public void initialize(ImageModel model, Stage primaryStage) {
+        this.model = model;
+        this.primaryStage = primaryStage;
+
+        gc = canvas.getGraphicsContext2D();
+        gc.setStroke(Color.RED);
+        gc.setLineWidth(brushSizeSlider.getValue());
+
+        canvas.setOnMousePressed(this::onMousePressed);
+        canvas.setOnMouseDragged(this::onMouseDragged);
+        canvas.setOnMouseReleased(this::onMouseReleased);
+
+        brushSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            gc.setLineWidth(newValue.doubleValue());
+        });
+
+        brushColorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            gc.setStroke(newValue);
+        });
+    }
 
     @FXML
     private void loadImage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Image File");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif")
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.bmp")
         );
-        String filePath = fileChooser.showOpenDialog(primaryStage).getAbsolutePath();
-        model.loadImage(filePath);
-        imageView.setImage(model.getImage());
+        java.io.File file = fileChooser.showOpenDialog(primaryStage);
+        if (file != null) {
+            String originalPath = file.getAbsolutePath();
+            model.loadImage(originalPath);
+            imageView.setImage(model.getImage());
+        }
     }
 
     @FXML
@@ -66,5 +89,20 @@ public class MainController {
     private void applySobelFilter() {
         model.applySobelFilter();
         imageView.setImage(model.getImage());
+    }
+
+    private void onMousePressed(MouseEvent event) {
+        lastX = event.getX();
+        lastY = event.getY();
+    }
+
+    private void onMouseDragged(MouseEvent event) {
+        gc.strokeLine(lastX, lastY, event.getX(), event.getY());
+        lastX = event.getX();
+        lastY = event.getY();
+    }
+
+    private void onMouseReleased(MouseEvent event) {
+        // Обработка завершения рисования, если необходимо
     }
 }

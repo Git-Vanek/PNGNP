@@ -45,7 +45,7 @@ public class HelloController {
             Stage primaryStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             controller.initialize(model, primaryStage);
 
-            Scene scene = new Scene(root, 800, 600);
+            Scene scene = new Scene(root, 1200, 800);
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (Exception e) {
