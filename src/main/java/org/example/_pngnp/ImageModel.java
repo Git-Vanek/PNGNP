@@ -6,11 +6,18 @@ import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 public class ImageModel {
     private Image image;
 
     public void loadImage(String filePath) {
-        image = new Image(filePath);
+        try {
+            image = new Image(new FileInputStream(filePath));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public Image getImage() {
