@@ -25,6 +25,7 @@
 
     <HBox alignment="CENTER" spacing="10.0">
         <Button text="Load Image" onAction="#loadImage" styleClass="button"/>
+        <Button text="Save Image" onAction="#saveImage" styleClass="button"/>
         <Button text="Grayscale Filter" onAction="#applyGrayscaleFilter" styleClass="button"/>
         <Button text="Median Filter" onAction="#applyMedianFilter" styleClass="button"/>
         <Button text="Threshold Filter" onAction="#applyThresholdFilter" styleClass="button"/>
