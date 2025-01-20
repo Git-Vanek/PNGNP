@@ -2,11 +2,14 @@ package org.example._pngnp;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Slider;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -35,6 +38,7 @@ public class MainController {
     private GraphicsContext gc;
     private double lastX, lastY;
 
+    @FXML
     public void initialize(ImageModel model, Stage primaryStage) {
         this.model = model;
         this.primaryStage = primaryStage;
@@ -63,7 +67,7 @@ public class MainController {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.bmp")
         );
-        java.io.File file = fileChooser.showOpenDialog(primaryStage);
+        File file = fileChooser.showOpenDialog(primaryStage);
         if (file != null) {
             String originalPath = file.getAbsolutePath();
             model.loadImage(originalPath);
@@ -85,7 +89,9 @@ public class MainController {
             try {
                 javafx.scene.image.Image image = model.getImage();
                 if (image != null) {
-                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(image, null);
+                    // Combine the image with the canvas content
+                    WritableImage combinedImage = combineImageWithCanvas(image);
+                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(combinedImage, null);
                     String format = getFileExtension(file);
                     ImageIO.write(bufferedImage, format, file);
                 } else {
@@ -95,6 +101,38 @@ public class MainController {
                 e.printStackTrace();
             }
         }
+    }
+
+    private WritableImage combineImageWithCanvas(javafx.scene.image.Image image) {
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        WritableImage combinedImage = new WritableImage(width, height);
+        PixelWriter writer = combinedImage.getPixelWriter();
+
+        // Draw the image onto the combined image
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                writer.setColor(x, y, image.getPixelReader().getColor(x, y));
+            }
+        }
+
+        // Draw the canvas content onto the combined image
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        WritableImage canvasImage = canvas.snapshot(params, null);
+        int canvasWidth = (int) canvas.getWidth();
+        int canvasHeight = (int) canvas.getHeight();
+
+        for (int y = 0; y < Math.min(height, canvasHeight); y++) {
+            for (int x = 0; x < Math.min(width, canvasWidth); x++) {
+                Color canvasColor = canvasImage.getPixelReader().getColor(x, y);
+                if (canvasColor.getOpacity() > 0) {
+                    writer.setColor(x, y, canvasColor);
+                }
+            }
+        }
+
+        return combinedImage;
     }
 
     private String getFileExtension(File file) {
