@@ -13,6 +13,9 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Objects;
+
+@SuppressWarnings("ALL")
 public class HelloController {
 
     private static final Logger logger = LogManager.getLogger(HelloController.class);
@@ -22,7 +25,7 @@ public class HelloController {
     @FXML
     public void initialize() {
         // Загрузка логотипа из папки resources
-        Image logoImage = new Image(getClass().getResourceAsStream("/images/logo.png"));
+        Image logoImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/logo.png")));
         logoImageView.setImage(logoImage);
         // Запись в лог
         logger.info("Logo loaded");

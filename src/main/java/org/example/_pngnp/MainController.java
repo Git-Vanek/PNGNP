@@ -19,6 +19,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
+@SuppressWarnings("ALL")
 public class MainController {
     private ImageModel model;
     private Stage primaryStage;
@@ -51,13 +52,9 @@ public class MainController {
         canvas.setOnMouseDragged(this::onMouseDragged);
         canvas.setOnMouseReleased(this::onMouseReleased);
 
-        brushSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-            gc.setLineWidth(newValue.doubleValue());
-        });
+        brushSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setLineWidth(newValue.doubleValue()));
 
-        brushColorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
-            gc.setStroke(newValue);
-        });
+        brushColorPicker.valueProperty().addListener((observable, oldValue, newValue) -> gc.setStroke(newValue));
     }
 
     @FXML
