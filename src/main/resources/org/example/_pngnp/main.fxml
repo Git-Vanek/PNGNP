@@ -5,37 +5,52 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox stylesheets="@styles.css" styleClass="vbox" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example._pngnp.MainController">
-
-    <HBox styleClass="hbox">
-        <Label styleClass="title" text="PNGNP"/>
-        <HBox styleClass="hbox">
-            <Button styleClass="button" onAction="#loadImage" text="Load Image"/>
-            <Button styleClass="button" onAction="#saveImage" text="Save Image"/>
+<BorderPane stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example._pngnp.MainController">
+    <!-- Шапка -->
+    <top>
+        <HBox styleClass="top-vbox">
+            <Label styleClass="title" text="PNGNP" />
+            <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
+                <Button onAction="#loadImage" styleClass="button" text="Load Image" />
+                <Button onAction="#saveImage" styleClass="button" text="Save Image" />
+            </HBox>
+            <Button styleClass="button" text="Information" />
         </HBox>
-        <Button styleClass="button" text="Information"/>
-    </HBox>
-
-    <StackPane>
-        <ImageView styleClass="image" fx:id="imageView" fitHeight="400.0" fitWidth="400.0" preserveRatio="true" />
-        <Canvas fx:id="canvas" height="400.0" width="400.0" />
-    </StackPane>
-
-    <HBox styleClass="hbox">
-        <Button styleClass="button" onAction="#applyGrayscaleFilter" text="Grayscale Filter" />
-        <Button styleClass="button" onAction="#applyMedianFilter" text="Median Filter" />
-        <Button styleClass="button" onAction="#applyThresholdFilter" text="Threshold Filter" />
-        <Button styleClass="button" onAction="#applySobelFilter" text="Sobel Filter" />
-    </HBox>
-
-    <HBox styleClass="hbox">
-        <Label styleClass="label" text="Brush Size:" />
-        <Slider fx:id="brushSizeSlider" blockIncrement="1.0" majorTickUnit="10.0" max="50.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" value="10.0" />
-    </HBox>
-
-    <HBox styleClass="hbox">
-        <Label styleClass="label" text="Brush Color:" />
-        <ColorPicker fx:id="brushColorPicker" />
-    </HBox>
-
-</VBox>
+    </top>
+    <!-- Основная панель с изображением и canvas для рисования -->
+    <center>
+        <StackPane styleClass="stack-pane">
+            <ImageView styleClass="image" fx:id="imageView" preserveRatio="true" />
+            <Canvas fx:id="canvas" />
+        </StackPane>
+    </center>
+    <!-- Выдвижная панель слева с инструментами -->
+    <left>
+        <VBox styleClass="left-vbox">
+            <VBox styleClass="hbox">
+                <Button styleClass="button" onAction="#applyGrayscaleFilter" text="Grayscale Filter" />
+                <Button styleClass="button" onAction="#applyMedianFilter" text="Median Filter" />
+                <Button styleClass="button" onAction="#applyThresholdFilter" text="Threshold Filter" />
+                <Button styleClass="button" onAction="#applySobelFilter" text="Sobel Filter" />
+            </VBox>
+            <HBox styleClass="hbox">
+                <Label styleClass="label" text="Brush Size:" />
+                <Slider fx:id="brushSizeSlider" blockIncrement="1.0" majorTickUnit="10.0" max="50.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" value="10.0" />
+            </HBox>
+            <HBox styleClass="hbox">
+                <Label styleClass="label" text="Brush Color:" />
+                <ColorPicker fx:id="brushColorPicker" />
+            </HBox>
+        </VBox>
+    </left>
+    <!-- Нижняя панель с кнопками -->
+    <bottom>
+        <HBox styleClass="footer">
+            <Button styleClass="button" text="Undo" />
+            <Button styleClass="button" text="Redo" />
+            <Label styleClass="label" text="Zoom:" />
+            <Button styleClass="button" text="+" />
+            <Button styleClass="button" text="-" />
+        </HBox>
+    </bottom>
+</BorderPane>
