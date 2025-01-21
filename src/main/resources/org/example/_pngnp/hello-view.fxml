@@ -6,14 +6,14 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.image.ImageView?>
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example._pngnp.HelloController"
-      prefHeight="1024.0" prefWidth="768.0" stylesheets="@styles.css">
+<VBox stylesheets="@styles.css" styleClass="vbox" xmlns:fx="http://javafx.com/fxml" fx:controller="org.example._pngnp.HelloController">
+
   <padding>
     <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
   </padding>
 
-  <ImageView fx:id="logoImageView" fitWidth="200" fitHeight="200" preserveRatio="true" styleClass="logo" />
-  <Label text="PNGNP" styleClass="title" />
-  <Button text="Start" onAction="#onStartButtonClick" styleClass="button"/>
+  <ImageView styleClass="logo" fx:id="logoImageView" fitWidth="200" fitHeight="200" preserveRatio="true" />
+  <Label styleClass="title" text="PNGNP" />
+  <Button styleClass="button" text="Start" onAction="#onStartButtonClick" />
+
 </VBox>

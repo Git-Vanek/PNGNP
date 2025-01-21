@@ -15,8 +15,9 @@ public class HelloApplication extends Application {
         Scene scene = new Scene(root, 1200, 800);
         primaryStage.setTitle("PNGNP");
         primaryStage.setScene(scene);
-        // Отключаем возможность изменения размера окна
-        primaryStage.setResizable(false);
+        // Установка минимальных размеров окна
+        primaryStage.setMinWidth(1200);
+        primaryStage.setMinHeight(800);
         // Отображение окна
         primaryStage.show();
     }
