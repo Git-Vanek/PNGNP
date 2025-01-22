@@ -27,18 +27,18 @@
     <!-- Выдвижная панель слева с инструментами -->
     <left>
         <VBox styleClass="left-vbox">
-            <VBox styleClass="hbox">
+            <VBox styleClass="vbox">
                 <Button styleClass="button" onAction="#applyGrayscaleFilter" text="Grayscale Filter" />
                 <Button styleClass="button" onAction="#applyMedianFilter" text="Median Filter" />
                 <Button styleClass="button" onAction="#applyThresholdFilter" text="Threshold Filter" />
                 <Button styleClass="button" onAction="#applySobelFilter" text="Sobel Filter" />
             </VBox>
             <HBox styleClass="hbox">
-                <Label styleClass="label" text="Brush Size:" />
+                <Label styleClass="label_FFFFFF" text="Brush Size:" />
                 <Slider fx:id="brushSizeSlider" blockIncrement="1.0" majorTickUnit="10.0" max="50.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" value="10.0" />
             </HBox>
             <HBox styleClass="hbox">
-                <Label styleClass="label" text="Brush Color:" />
+                <Label styleClass="label_FFFFFF" text="Brush Color:" />
                 <ColorPicker fx:id="brushColorPicker" />
             </HBox>
         </VBox>
@@ -48,7 +48,7 @@
         <HBox styleClass="footer">
             <Button styleClass="button" text="Undo" />
             <Button styleClass="button" text="Redo" />
-            <Label styleClass="label" text="Zoom:" />
+            <Label styleClass="label_FFFFFF" text="Zoom:" />
             <Button styleClass="button" text="+" />
             <Button styleClass="button" text="-" />
         </HBox>

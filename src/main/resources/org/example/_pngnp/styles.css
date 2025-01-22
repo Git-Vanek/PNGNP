@@ -1,6 +1,6 @@
 /* Общий стиль для всего приложения */
 .root {
-    -fx-background-color: #E0F7FA;
+    -fx-background-color: #181F31;
     -fx-font-family: "Arial", sans-serif;
 }
 
@@ -18,7 +18,7 @@
 
 /* Стиль для кнопок */
 .button {
-    -fx-background-color: #00BFA5;
+    -fx-background-color: #2E2E99;
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 18px;
     -fx-padding: 10px 20px;
@@ -28,7 +28,7 @@
 }
 
 .button:hover {
-    -fx-background-color: #00796B;
+    -fx-background-color: #6161CC;
 }
 
 /* Стиль для меток */
@@ -40,8 +40,8 @@
 /* Стиль для текстовых полей */
 .text-field {
     -fx-background-color: #FFFFFF;
-    -fx-border-color: #00796B;
-    -fx-border-width: 1px;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 2px;
     -fx-border-radius: 3;
     -fx-padding: 5px;
     -fx-font-size: 14px;
@@ -61,15 +61,21 @@
 .title {
     -fx-font-size: 36px;
     -fx-font-weight: bold;
-    -fx-text-fill: #00BFA5;
+    -fx-text-fill: #FFFFFF;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 0);
+}
+
+/* Стиль для меток на фоне */
+.label_FFFFFF {
+    -fx-font-size: 16px;
+    -fx-text-fill: #FFFFFF;
 }
 
 /* Стиль для ColorPicker */
 .color-picker {
     -fx-background-color: #FFFFFF;
-    -fx-border-color: #00796B;
-    -fx-border-width: 1px;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 2px;
     -fx-border-radius: 3;
     -fx-padding: 5px;
     -fx-font-size: 14px;
@@ -77,8 +83,8 @@
 
 /* Стили для контейнера top */
 .top-vbox {
-    -fx-border-color: #00796B;
-    -fx-border-width: 2px;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
     -fx-padding: 10px;
     -fx-alignment: CENTER;
     -fx-spacing: 10.0;
@@ -87,24 +93,23 @@
 /* Стили для контейнера center */
 .stack-pane {
     -fx-alignment: CENTER;
-    -fx-border-color: #00796B;
-    -fx-border-width: 2px;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
     -fx-padding: 10px;
 }
 
 /* Стили для контейнера left */
 .left-vbox {
-    -fx-alignment: CENTER;
-    -fx-border-color: #00796B;
-    -fx-border-width: 2px;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
     -fx-padding: 10px;
 }
 
 /* Стили для контейнера bottom */
 .footer {
     -fx-alignment: CENTER;
-    -fx-border-color: #00796B;
-    -fx-border-width: 2px;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
     -fx-padding: 10px;
     -fx-spacing: 10.0;
 }
