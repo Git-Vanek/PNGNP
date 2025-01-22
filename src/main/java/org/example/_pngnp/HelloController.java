@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Objects;
 
-@SuppressWarnings("ALL")
 public class HelloController {
 
     private static final Logger logger = LogManager.getLogger(HelloController.class);
@@ -46,7 +45,9 @@ public class HelloController {
             // Передача модели и основного окна в контроллер
             ImageModel model = new ImageModel();
             Stage primaryStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            controller.initialize(model, primaryStage);
+            controller.initialize();
+            controller.setModel(model);
+            controller.setPrimaryStage(primaryStage);
 
             Scene scene = new Scene(root, 1200, 800);
             primaryStage.setScene(scene);

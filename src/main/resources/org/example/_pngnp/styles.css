@@ -91,11 +91,15 @@
 }
 
 /* Стили для контейнера center */
-.stack-pane {
-    -fx-alignment: CENTER;
+.scroll-pane {
+    -fx-background-color: #181F31;
     -fx-border-color: #2D3446;
     -fx-border-width: 1px;
     -fx-padding: 10px;
+}
+
+.stack-pane {
+    -fx-background-color: #181F31;
 }
 
 /* Стили для контейнера left */

@@ -19,10 +19,12 @@
     </top>
     <!-- Основная панель с изображением и canvas для рисования -->
     <center>
-        <StackPane styleClass="stack-pane">
-            <ImageView styleClass="image" fx:id="imageView" preserveRatio="true" />
-            <Canvas fx:id="canvas" />
-        </StackPane>
+        <ScrollPane fx:id="scrollPane" styleClass="scroll-pane" fitToWidth="true" fitToHeight="true">
+            <StackPane styleClass="stack-pane">
+                <ImageView fx:id="imageView" preserveRatio="true" />
+                <Canvas fx:id="canvas" />
+            </StackPane>
+        </ScrollPane>
     </center>
     <!-- Выдвижная панель слева с инструментами -->
     <left>
@@ -46,11 +48,16 @@
     <!-- Нижняя панель с кнопками -->
     <bottom>
         <HBox styleClass="footer">
-            <Button styleClass="button" text="Undo" />
-            <Button styleClass="button" text="Redo" />
-            <Label styleClass="label_FFFFFF" text="Zoom:" />
-            <Button styleClass="button" text="+" />
-            <Button styleClass="button" text="-" />
+            <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
+                <Button styleClass="button" text="Undo" />
+                <Button styleClass="button" text="Redo" />
+            </HBox>
+            <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
+                <Label styleClass="label_FFFFFF" text="Zoom:"/>
+                <TextField fx:id="zoomTextField" prefWidth="50" alignment="CENTER_RIGHT" text="100%"/>
+                <Button styleClass="button" text="+" onAction="#increaseZoom"/>
+                <Button styleClass="button" text="-" onAction="#decreaseZoom"/>
+            </HBox>
         </HBox>
     </bottom>
 </BorderPane>
