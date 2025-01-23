@@ -1,34 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Импорт необходимых классов из библиотеки JavaFX -->
 <?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
+<!-- Основной контейнер BorderPane с применением стилей и контроллера -->
 <BorderPane stylesheets="@../styles/main.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example._pngnp.controllers.MainController">
+
     <!-- Шапка -->
     <top>
         <HBox styleClass="top-vbox">
+            <!-- Заголовок приложения -->
             <Label styleClass="title" text="PNGNP" />
+            <!-- Контейнер для кнопок загрузки и сохранения изображения -->
             <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
                 <Button onAction="#loadImage" styleClass="button" text="Load Image" />
                 <Button onAction="#saveImage" styleClass="button" text="Save Image" />
             </HBox>
+            <!-- Кнопка с вопросительным знаком -->
             <Button styleClass="button" text="?" />
         </HBox>
     </top>
+
     <!-- Основная панель с изображением и canvas для рисования -->
     <center>
         <ScrollPane fx:id="scrollPane" styleClass="scroll-pane" fitToWidth="true" fitToHeight="true">
             <StackPane styleClass="stack-pane">
+                <!-- Элемент ImageView для отображения изображения -->
                 <ImageView fx:id="imageView" preserveRatio="true" />
+                <!-- Элемент Canvas для рисования -->
                 <Canvas fx:id="canvas" />
             </StackPane>
         </ScrollPane>
     </center>
+
     <!-- Выдвижная панель слева с инструментами -->
     <left>
         <VBox styleClass="left-vbox">
+            <!-- Кнопки для различных инструментов -->
             <Button styleClass="button" fx:id="button_draw" />
             <Button styleClass="button" fx:id="button_crop" />
             <Button styleClass="button" fx:id="button_stickers" />
@@ -37,13 +48,16 @@
             <Button styleClass="button" fx:id="button_brightness_and_contrast" />
         </VBox>
     </left>
+
     <!-- Нижняя панель с кнопками -->
     <bottom>
         <HBox styleClass="footer">
+            <!-- Контейнер для кнопок отмены и повтора действий -->
             <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
                 <Button styleClass="button" text="Undo" />
                 <Button styleClass="button" text="Redo" />
             </HBox>
+            <!-- Контейнер для управления масштабом -->
             <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
                 <Label styleClass="label_FFFFFF" text="Zoom:"/>
                 <TextField fx:id="zoomTextField" prefWidth="50" alignment="CENTER_RIGHT" text="100%"/>
@@ -52,4 +66,5 @@
             </HBox>
         </HBox>
     </bottom>
+
 </BorderPane>

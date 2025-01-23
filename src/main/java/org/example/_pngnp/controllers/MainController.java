@@ -1,5 +1,7 @@
+// Объявление пакета, к которому принадлежит класс
 package org.example._pngnp.controllers;
 
+// Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
@@ -18,19 +20,26 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+// Импорт модели изображения
 import org.example._pngnp.models.ImageModel;
 
+// Импорт классов для работы с изображениями и файлами
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 // Основной контроллер для управления интерфейсом и логикой приложения
 public class MainController {
+    // Модель изображения
     private ImageModel model;
+
+    // Основное окно приложения
     private Stage primaryStage;
 
+    // Аннотации FXML для связывания с элементами интерфейса
     @FXML
     private Button button_draw;
 
@@ -67,12 +76,17 @@ public class MainController {
     @FXML
     private TextField zoomTextField;
 
+    // Текущий уровень масштабирования
     private double zoomLevel = 1.0;
+
+    // Координаты мыши для перетаскивания
     private double mouseX, mouseY;
+
+    // Флаг перетаскивания
     private boolean dragging = false;
 
-    private GraphicsContext gc;
-    private double lastX, lastY;
+    // Контекст графики для рисования на холсте
+    public GraphicsContext gc;
 
     // Инициализация компонентов и обработчиков событий
     @FXML
@@ -85,14 +99,17 @@ public class MainController {
         setButtonImage(button_layers, "/org/example/_pngnp/images/layers.png");
         setButtonImage(button_brightness_and_contrast, "/org/example/_pngnp/images/brightness_and_contrast.png");
 
+        // Установка обработчиков для слайдера размера кисти
         if (brushSizeSlider != null) {
             brushSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setLineWidth(newValue.doubleValue()));
         }
 
+        // Установка обработчиков для выбора цвета кисти
         if (brushColorPicker != null) {
             brushColorPicker.valueProperty().addListener((observable, oldValue, newValue) -> gc.setStroke(newValue));
         }
 
+        // Установка обработчиков для поля ввода масштаба
         if (zoomTextField != null) {
             zoomTextField.textProperty().addListener((observable, oldValue, newValue) -> {
                 try {
@@ -107,8 +124,8 @@ public class MainController {
             });
         }
 
+        // Установка обработчиков событий мыши для перемещения изображения
         if (scrollPane != null) {
-            // Обработчики событий мыши для перемещения изображения
             scrollPane.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
                 mouseX = event.getSceneX();
                 mouseY = event.getSceneY();
@@ -132,10 +149,10 @@ public class MainController {
 
     // Метод установки иконки для кнопки
     private void setButtonImage(Button button, String imagePath) {
-        Image image = new Image(getClass().getResourceAsStream(imagePath));
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(50); // Установите нужный размер
-        imageView.setFitHeight(50); // Установите нужный размер
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
         button.setGraphic(imageView);
     }
 
@@ -190,6 +207,7 @@ public class MainController {
                     System.out.println("No image to save.");
                 }
             } catch (IOException e) {
+                //noinspection CallToPrintStackTrace
                 e.printStackTrace();
             }
         }
@@ -238,52 +256,6 @@ public class MainController {
         return name.substring(lastIndexOf + 1);
     }
 
-    // Применение фильтра серого цвета
-    @FXML
-    private void applyGrayscaleFilter() {
-        model.applyGrayscaleFilter();
-        imageView.setImage(model.getImage());
-    }
-
-    // Применение медианного фильтра
-    @FXML
-    private void applyMedianFilter() {
-        model.applyMedianFilter(3); // Пример размера
-        imageView.setImage(model.getImage());
-    }
-
-    // Применение порогового фильтра
-    @FXML
-    private void applyThresholdFilter() {
-        model.applyThresholdFilter(0.5); // Пример порога
-        imageView.setImage(model.getImage());
-    }
-
-    // Применение фильтра Собеля
-    @FXML
-    private void applySobelFilter() {
-        model.applySobelFilter();
-        imageView.setImage(model.getImage());
-    }
-
-    // Обработка нажатия мыши
-    private void onMousePressed(MouseEvent event) {
-        lastX = event.getX();
-        lastY = event.getY();
-    }
-
-    // Обработка перетаскивания мыши
-    private void onMouseDragged(MouseEvent event) {
-        gc.strokeLine(lastX, lastY, event.getX(), event.getY());
-        lastX = event.getX();
-        lastY = event.getY();
-    }
-
-    // Обработка отпускания мыши
-    private void onMouseReleased(MouseEvent event) {
-        // Обработка завершения рисования, если необходимо
-    }
-
     // Увеличение масштаба
     @FXML
     private void increaseZoom() {
@@ -314,5 +286,12 @@ public class MainController {
         if (scrollPane != null) {
             scrollPane.layout();
         }
+    }
+
+    // Применение фильтра
+    @FXML
+    private void applySobelFilter() {
+        model.apply1Filter();
+        imageView.setImage(model.getImage());
     }
 }

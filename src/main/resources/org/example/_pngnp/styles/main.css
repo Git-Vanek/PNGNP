@@ -19,7 +19,7 @@
 /* Стиль для кнопок */
 .button {
     -fx-background-color: #2E2E99;
-    -fx-text-fill: #FFFFFF;
+    -fx-text-fill: #FFF FFF;
     -fx-font-size: 18px;
     -fx-padding: 10px 20px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 0);
@@ -39,7 +39,7 @@
 
 /* Стиль для текстовых полей */
 .text-field {
-    -fx-background-color: #FFFFFF;
+    -fx-background-color: #FFF FFF;
     -fx-border-color: #2D3446;
     -fx-border-width: 2px;
     -fx-border-radius: 3;
@@ -61,19 +61,19 @@
 .title {
     -fx-font-size: 36px;
     -fx-font-weight: bold;
-    -fx-text-fill: #FFFFFF;
+    -fx-text-fill: #FFF FFF;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 0);
 }
 
 /* Стиль для меток на фоне */
 .label_FFFFFF {
     -fx-font-size: 16px;
-    -fx-text-fill: #FFFFFF;
+    -fx-text-fill: #FFF FFF;
 }
 
 /* Стиль для ColorPicker */
 .color-picker {
-    -fx-background-color: #FFFFFF;
+    -fx-background-color: #FFF FFF;
     -fx-border-color: #2D3446;
     -fx-border-width: 2px;
     -fx-border-radius: 3;
@@ -97,7 +97,6 @@
     -fx-border-width: 1px;
     -fx-padding: 10px;
 }
-
 .stack-pane {
     -fx-background-color: #181F31;
 }
@@ -110,7 +109,7 @@
     -fx-spacing: 10.0;
 }
 
-/* Стили для контейнера bottom */
+/* Стили для контейнера footer */
 .footer {
     -fx-alignment: CENTER;
     -fx-border-color: #2D3446;
