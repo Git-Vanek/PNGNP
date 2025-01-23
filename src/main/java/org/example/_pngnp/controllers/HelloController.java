@@ -1,4 +1,4 @@
-package org.example._pngnp;
+package org.example._pngnp.controllers;
 
 import javafx.animation.FadeTransition;
 import javafx.event.ActionEvent;
@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example._pngnp.models.ImageModel;
 
 import java.util.Objects;
 
@@ -24,7 +25,7 @@ public class HelloController {
     @FXML
     public void initialize() {
         // Загрузка логотипа из папки resources
-        Image logoImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/logo.png")));
+        Image logoImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/org/example/_pngnp/images/logo.png")));
         logoImageView.setImage(logoImage);
         // Запись в лог
         logger.info("Logo loaded");
@@ -38,7 +39,7 @@ public class HelloController {
     @FXML
     protected void onStartButtonClick(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/main.fxml"));
             Parent root = loader.load();
             MainController controller = loader.getController();
 

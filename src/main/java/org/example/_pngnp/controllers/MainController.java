@@ -1,14 +1,16 @@
-package org.example._pngnp;
+package org.example._pngnp.controllers;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Button;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -16,7 +18,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.example._pngnp.models.ImageModel;
+
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +30,24 @@ import java.io.IOException;
 public class MainController {
     private ImageModel model;
     private Stage primaryStage;
+
+    @FXML
+    private Button button_draw;
+
+    @FXML
+    private Button button_crop;
+
+    @FXML
+    private Button button_stickers;
+
+    @FXML
+    private Button button_filters;
+
+    @FXML
+    private Button button_layers;
+
+    @FXML
+    private Button button_brightness_and_contrast;
 
     @FXML
     private ScrollPane scrollPane;
@@ -54,15 +77,13 @@ public class MainController {
     // Инициализация компонентов и обработчиков событий
     @FXML
     public void initialize() {
-        if (canvas != null) {
-            gc = canvas.getGraphicsContext2D();
-            gc.setStroke(Color.RED);
-            gc.setLineWidth(brushSizeSlider.getValue());
-
-            canvas.setOnMousePressed(this::onMousePressed);
-            canvas.setOnMouseDragged(this::onMouseDragged);
-            canvas.setOnMouseReleased(this::onMouseReleased);
-        }
+        // Установка иконок для кнопок
+        setButtonImage(button_draw, "/org/example/_pngnp/images/draw.png");
+        setButtonImage(button_crop, "/org/example/_pngnp/images/crop.png");
+        setButtonImage(button_stickers, "/org/example/_pngnp/images/stickers.png");
+        setButtonImage(button_filters, "/org/example/_pngnp/images/filters.png");
+        setButtonImage(button_layers, "/org/example/_pngnp/images/layers.png");
+        setButtonImage(button_brightness_and_contrast, "/org/example/_pngnp/images/brightness_and_contrast.png");
 
         if (brushSizeSlider != null) {
             brushSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setLineWidth(newValue.doubleValue()));
@@ -107,6 +128,15 @@ public class MainController {
 
             scrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> dragging = false);
         }
+    }
+
+    // Метод установки иконки для кнопки
+    private void setButtonImage(Button button, String imagePath) {
+        Image image = new Image(getClass().getResourceAsStream(imagePath));
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(50); // Установите нужный размер
+        imageView.setFitHeight(50); // Установите нужный размер
+        button.setGraphic(imageView);
     }
 
     // Установка модели изображения

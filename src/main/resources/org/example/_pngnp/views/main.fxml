@@ -5,7 +5,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane stylesheets="@styles.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example._pngnp.MainController">
+<BorderPane stylesheets="@../styles/main.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example._pngnp.controllers.MainController">
     <!-- Шапка -->
     <top>
         <HBox styleClass="top-vbox">
@@ -14,7 +14,7 @@
                 <Button onAction="#loadImage" styleClass="button" text="Load Image" />
                 <Button onAction="#saveImage" styleClass="button" text="Save Image" />
             </HBox>
-            <Button styleClass="button" text="Information" />
+            <Button styleClass="button" text="?" />
         </HBox>
     </top>
     <!-- Основная панель с изображением и canvas для рисования -->
@@ -29,20 +29,12 @@
     <!-- Выдвижная панель слева с инструментами -->
     <left>
         <VBox styleClass="left-vbox">
-            <VBox styleClass="vbox">
-                <Button styleClass="button" onAction="#applyGrayscaleFilter" text="Grayscale Filter" />
-                <Button styleClass="button" onAction="#applyMedianFilter" text="Median Filter" />
-                <Button styleClass="button" onAction="#applyThresholdFilter" text="Threshold Filter" />
-                <Button styleClass="button" onAction="#applySobelFilter" text="Sobel Filter" />
-            </VBox>
-            <HBox styleClass="hbox">
-                <Label styleClass="label_FFFFFF" text="Brush Size:" />
-                <Slider fx:id="brushSizeSlider" blockIncrement="1.0" majorTickUnit="10.0" max="50.0" min="1.0" minorTickCount="1" showTickLabels="true" showTickMarks="true" value="10.0" />
-            </HBox>
-            <HBox styleClass="hbox">
-                <Label styleClass="label_FFFFFF" text="Brush Color:" />
-                <ColorPicker fx:id="brushColorPicker" />
-            </HBox>
+            <Button styleClass="button" fx:id="button_draw" />
+            <Button styleClass="button" fx:id="button_crop" />
+            <Button styleClass="button" fx:id="button_stickers" />
+            <Button styleClass="button" fx:id="button_filters" />
+            <Button styleClass="button" fx:id="button_layers" />
+            <Button styleClass="button" fx:id="button_brightness_and_contrast" />
         </VBox>
     </left>
     <!-- Нижняя панель с кнопками -->

@@ -1,4 +1,4 @@
-package org.example._pngnp;
+package org.example._pngnp.models;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;

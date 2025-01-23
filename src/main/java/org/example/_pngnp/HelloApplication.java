@@ -10,7 +10,7 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         // Настройка окна
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("hello-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("views/hello-view.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root, 1200, 800);
         primaryStage.setTitle("PNGNP");
