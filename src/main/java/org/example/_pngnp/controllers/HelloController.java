@@ -36,20 +36,25 @@ public class HelloController {
     // Метод инициализации контроллера
     @FXML
     public void initialize() {
-        // Загрузка логотипа из папки resources
-        Image logoImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/org/example/_pngnp/images/logo.png")));
+        logger.info("Initializing HelloController");
+        try {
+            // Загрузка логотипа из папки resources
+            Image logoImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/org/example/_pngnp/images/logo.png")));
+            logger.info("Logo image loaded successfully");
 
-        // Установка логотипа в ImageView
-        logoImageView.setImage(logoImage);
+            // Установка логотипа в ImageView
+            logoImageView.setImage(logoImage);
+            logger.info("Logo image set in ImageView");
 
-        // Запись в лог о загрузке логотипа
-        logger.info("Logo loaded");
-
-        // Создание анимации появления логотипа
-        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(2), logoImageView);
-        fadeTransition.setFromValue(0.0);
-        fadeTransition.setToValue(1.0);
-        fadeTransition.play();
+            // Создание анимации появления логотипа
+            FadeTransition fadeTransition = new FadeTransition(Duration.seconds(2), logoImageView);
+            fadeTransition.setFromValue(0.0);
+            fadeTransition.setToValue(1.0);
+            fadeTransition.play();
+            logger.info("Fade transition started");
+        } catch (Exception e) {
+            logger.error("Error occurred during initialization", e);
+        }
     }
 
     // Метод обработки нажатия на кнопку "Start"
@@ -59,29 +64,38 @@ public class HelloController {
             // Загрузка нового FXML файла для основного интерфейса
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/main.fxml"));
             Parent root = loader.load();
+            logger.info("Main FXML file loaded successfully");
 
             // Получение контроллера основного интерфейса
             Stage primaryStage = getStage(event, loader);
+            logger.info("Primary stage obtained");
 
             // Создание новой сцены и установка её в основное окно
             Scene scene = new Scene(root, 1200, 800);
+            logger.info("Scene created");
+
+            assert primaryStage != null;
             primaryStage.setScene(scene);
             primaryStage.show();
+            logger.info("Main scene displayed");
         } catch (Exception e) {
-            // Обработка исключений и вывод стека вызовов
-            //noinspection CallToPrintStackTrace
-            e.printStackTrace();
+            logger.error("Error occurred during start button click", e);
         }
     }
 
     // Метод получения контроллера основного интерфейса
     private static Stage getStage(ActionEvent event, FXMLLoader loader) {
-        MainController controller = loader.getController();
-        ImageModel model = new ImageModel();
-        Stage primaryStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-        controller.initialize();
-        controller.setModel(model);
-        controller.setPrimaryStage(primaryStage);
-        return primaryStage;
+        try {
+            MainController controller = loader.getController();
+            ImageModel model = new ImageModel();
+            Stage primaryStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
+            controller.setModel(model);
+            controller.setPrimaryStage(primaryStage);
+            logger.info("Main controller initialized and primary stage set");
+            return primaryStage;
+        } catch (Exception e) {
+            logger.error("Error occurred while getting the main controller", e);
+            return null;
+        }
     }
 }

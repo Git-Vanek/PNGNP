@@ -8,9 +8,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -20,6 +17,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+// Импорт классов для логирования
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // Импорт модели изображения
 import org.example._pngnp.models.ImageModel;
@@ -33,6 +34,10 @@ import java.util.Objects;
 
 // Основной контроллер для управления интерфейсом и логикой приложения
 public class MainController {
+
+    // Логгер для записи логов
+    private static final Logger logger = LogManager.getLogger(MainController.class);
+
     // Модель изображения
     private ImageModel model;
 
@@ -68,12 +73,6 @@ public class MainController {
     private Canvas canvas;
 
     @FXML
-    private Slider brushSizeSlider;
-
-    @FXML
-    private ColorPicker brushColorPicker;
-
-    @FXML
     private TextField zoomTextField;
 
     // Текущий уровень масштабирования
@@ -85,12 +84,10 @@ public class MainController {
     // Флаг перетаскивания
     private boolean dragging = false;
 
-    // Контекст графики для рисования на холсте
-    public GraphicsContext gc;
-
     // Инициализация компонентов и обработчиков событий
     @FXML
     public void initialize() {
+        logger.info("Initializing MainController");
         // Установка иконок для кнопок
         setButtonImage(button_draw, "/org/example/_pngnp/images/draw.png");
         setButtonImage(button_crop, "/org/example/_pngnp/images/crop.png");
@@ -98,16 +95,6 @@ public class MainController {
         setButtonImage(button_filters, "/org/example/_pngnp/images/filters.png");
         setButtonImage(button_layers, "/org/example/_pngnp/images/layers.png");
         setButtonImage(button_brightness_and_contrast, "/org/example/_pngnp/images/brightness_and_contrast.png");
-
-        // Установка обработчиков для слайдера размера кисти
-        if (brushSizeSlider != null) {
-            brushSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setLineWidth(newValue.doubleValue()));
-        }
-
-        // Установка обработчиков для выбора цвета кисти
-        if (brushColorPicker != null) {
-            brushColorPicker.valueProperty().addListener((observable, oldValue, newValue) -> gc.setStroke(newValue));
-        }
 
         // Установка обработчиков для поля ввода масштаба
         if (zoomTextField != null) {
@@ -117,9 +104,10 @@ public class MainController {
                     if (newZoomLevel > 0) {
                         zoomLevel = newZoomLevel;
                         updateZoom();
+                        logger.info("ZoomTextField - Zoom level changed to: " + zoomLevel);
                     }
                 } catch (NumberFormatException e) {
-                    // Игнорирование некорректного ввода
+                    logger.warn("ZoomTextField - Invalid zoom level input: " + newValue);
                 }
             });
         }
@@ -130,6 +118,7 @@ public class MainController {
                 mouseX = event.getSceneX();
                 mouseY = event.getSceneY();
                 dragging = true;
+                logger.info("Mouse pressed at: (" + mouseX + ", " + mouseY + ")");
             });
 
             scrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
@@ -140,10 +129,14 @@ public class MainController {
                     scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getContent().getBoundsInLocal().getHeight());
                     mouseX = event.getSceneX();
                     mouseY = event.getSceneY();
+                    logger.info("Mouse dragged to: (" + mouseX + ", " + mouseY + ")");
                 }
             });
 
-            scrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> dragging = false);
+            scrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
+                dragging = false;
+                logger.info("Mouse released");
+            });
         }
     }
 
@@ -154,16 +147,19 @@ public class MainController {
         imageView.setFitWidth(30);
         imageView.setFitHeight(30);
         button.setGraphic(imageView);
+        logger.info("Button image set for: " + button.getId());
     }
 
     // Установка модели изображения
     public void setModel(ImageModel model) {
         this.model = model;
+        logger.info("Image model set");
     }
 
     // Установка основного окна приложения
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
+        logger.info("Primary stage set");
     }
 
     // Загрузка изображения
@@ -172,7 +168,7 @@ public class MainController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Image File");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif", "*.bmp")
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.bmp")
         );
         File file = fileChooser.showOpenDialog(primaryStage);
         if (file != null) {
@@ -180,6 +176,9 @@ public class MainController {
             model.loadImage(originalPath);
             imageView.setImage(model.getImage());
             updateScrollPane();
+            logger.info("Image loaded from: " + originalPath);
+        } else {
+            logger.warn("No image file selected");
         }
     }
 
@@ -203,13 +202,15 @@ public class MainController {
                     BufferedImage bufferedImage = SwingFXUtils.fromFXImage(combinedImage, null);
                     String format = getFileExtension(file);
                     ImageIO.write(bufferedImage, format, file);
+                    logger.info("Image saved to: " + file.getAbsolutePath());
                 } else {
-                    System.out.println("No image to save.");
+                    logger.warn("No image to save");
                 }
             } catch (IOException e) {
-                //noinspection CallToPrintStackTrace
-                e.printStackTrace();
+                logger.error("Error saving image", e);
             }
+        } else {
+            logger.warn("No file selected for saving image");
         }
     }
 
@@ -261,6 +262,7 @@ public class MainController {
     private void increaseZoom() {
         zoomLevel += 0.1;
         updateZoom();
+        logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
     }
 
     // Уменьшение масштаба
@@ -271,6 +273,7 @@ public class MainController {
             zoomLevel = 0.1;
         }
         updateZoom();
+        logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
     }
 
     // Обновление масштаба
@@ -285,13 +288,7 @@ public class MainController {
     private void updateScrollPane() {
         if (scrollPane != null) {
             scrollPane.layout();
+            logger.info("ScrollPane layout updated");
         }
-    }
-
-    // Применение фильтра
-    @FXML
-    private void applySobelFilter() {
-        model.apply1Filter();
-        imageView.setImage(model.getImage());
     }
 }
