@@ -40,12 +40,14 @@
     <left>
         <VBox styleClass="left-vbox">
             <!-- Кнопки для различных инструментов -->
-            <Button styleClass="button" fx:id="button_draw" />
-            <Button styleClass="button" fx:id="button_crop" />
-            <Button styleClass="button" fx:id="button_stickers" />
-            <Button styleClass="button" fx:id="button_filters" />
-            <Button styleClass="button" fx:id="button_layers" />
-            <Button styleClass="button" fx:id="button_brightness_and_contrast" />
+            <Button styleClass="button" fx:id="button_toggle_mode" onAction="#toggleMode" />
+            <Button styleClass="button" fx:id="button_draw_mode" onAction="#drawMode" />
+            <Button styleClass="button" fx:id="button_crop_mode" onAction="#cropMode" />
+            <Button styleClass="button" fx:id="button_text_mode" onAction="#textMode" />
+            <Button styleClass="button" fx:id="button_stickers_mode" onAction="#stickersMode" />
+            <Button styleClass="button" fx:id="button_filters_mode" onAction="#filtersMode" />
+            <Button styleClass="button" fx:id="button_layers_mode" onAction="#layersMode" />
+            <Button styleClass="button" fx:id="button_brightness_and_contrast_mode" onAction="#brightnessAndContrastMode" />
         </VBox>
     </left>
 

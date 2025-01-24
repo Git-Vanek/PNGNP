@@ -47,22 +47,28 @@ public class MainController {
 
     // Аннотации FXML для связывания с элементами интерфейса
     @FXML
-    private Button button_draw;
+    private Button button_toggle_mode;
 
     @FXML
-    private Button button_crop;
+    private Button button_draw_mode;
 
     @FXML
-    private Button button_stickers;
+    private Button button_crop_mode;
 
     @FXML
-    private Button button_filters;
+    private Button button_text_mode;
 
     @FXML
-    private Button button_layers;
+    private Button button_stickers_mode;
 
     @FXML
-    private Button button_brightness_and_contrast;
+    private Button button_filters_mode;
+
+    @FXML
+    private Button button_layers_mode;
+
+    @FXML
+    private Button button_brightness_and_contrast_mode;
 
     @FXML
     private ScrollPane scrollPane;
@@ -90,12 +96,14 @@ public class MainController {
     public void initialize() {
         logger.info("Initializing MainController");
         // Установка иконок для кнопок
-        setButtonImage(button_draw, "/org/example/_pngnp/images/draw.png");
-        setButtonImage(button_crop, "/org/example/_pngnp/images/crop.png");
-        setButtonImage(button_stickers, "/org/example/_pngnp/images/stickers.png");
-        setButtonImage(button_filters, "/org/example/_pngnp/images/filters.png");
-        setButtonImage(button_layers, "/org/example/_pngnp/images/layers.png");
-        setButtonImage(button_brightness_and_contrast, "/org/example/_pngnp/images/brightness_and_contrast.png");
+        setButtonImage(button_toggle_mode, "/org/example/_pngnp/images/toggle.png");
+        setButtonImage(button_draw_mode, "/org/example/_pngnp/images/draw.png");
+        setButtonImage(button_crop_mode, "/org/example/_pngnp/images/crop.png");
+        setButtonImage(button_text_mode, "/org/example/_pngnp/images/text.png");
+        setButtonImage(button_stickers_mode, "/org/example/_pngnp/images/stickers.png");
+        setButtonImage(button_filters_mode, "/org/example/_pngnp/images/filters.png");
+        setButtonImage(button_layers_mode, "/org/example/_pngnp/images/layers.png");
+        setButtonImage(button_brightness_and_contrast_mode, "/org/example/_pngnp/images/brightness_and_contrast.png");
 
         // Установка обработчиков для поля ввода масштаба
         if (zoomTextField != null) {
@@ -159,6 +167,54 @@ public class MainController {
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         logger.info("Primary stage set");
+    }
+
+    // Метод для кнопки переключения на режим перемещения
+    @FXML
+    private void toggleMode() {
+
+    }
+
+    // Метод для кнопки переключения на режим рисования
+    @FXML
+    private void drawMode() {
+
+    }
+
+    // Метод для кнопки переключения на режим редактирования
+    @FXML
+    private void cropMode() {
+
+    }
+
+    // Метод для кнопки переключения на режим работы с текстом
+    @FXML
+    private void textMode() {
+
+    }
+
+    // Метод для кнопки переключения на режим работы со стикерами
+    @FXML
+    private void stickersMode() {
+
+    }
+
+    // Метод для кнопки переключения на режим работы с фильтрами
+    @FXML
+    private void filtersMode() {
+
+    }
+
+    // Метод для кнопки переключения на режим работы со слоями
+    @FXML
+    private void layersMode() {
+
+    }
+
+    // Метод для кнопки переключения на режим
+    @FXML
+    private void brightnessAndContrastMode() {
+
     }
 
     // Загрузка изображения
