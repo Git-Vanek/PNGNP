@@ -14,6 +14,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -118,7 +119,6 @@ public class MainController {
                 mouseX = event.getSceneX();
                 mouseY = event.getSceneY();
                 dragging = true;
-                logger.info("Mouse pressed at: (" + mouseX + ", " + mouseY + ")");
             });
 
             scrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
@@ -129,7 +129,6 @@ public class MainController {
                     scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getContent().getBoundsInLocal().getHeight());
                     mouseX = event.getSceneX();
                     mouseY = event.getSceneY();
-                    logger.info("Mouse dragged to: (" + mouseX + ", " + mouseY + ")");
                 }
             });
 
@@ -278,16 +277,33 @@ public class MainController {
 
     // Обновление масштаба
     private void updateZoom() {
-        imageView.setScaleX(zoomLevel);
-        imageView.setScaleY(zoomLevel);
+        double newWidth = imageView.getImage().getWidth() * zoomLevel;
+        double newHeight = imageView.getImage().getHeight() * zoomLevel;
+
+        imageView.setFitWidth(newWidth);
+        imageView.setFitHeight(newHeight);
+
+        canvas.setWidth(newWidth);
+        canvas.setHeight(newHeight);
+
         zoomTextField.setText(String.format("%.0f%%", zoomLevel * 100));
+
+        // Обновление размеров ScrollPane
         updateScrollPane();
+
+        logger.info("Zoom level updated to: " + zoomLevel);
     }
 
     // Обновление размеров ScrollPane
     private void updateScrollPane() {
         if (scrollPane != null) {
             scrollPane.layout();
+            // Сброс содержимого для корректного обновления
+            scrollPane.setContent(null);
+            // Установка нового содержимого
+            scrollPane.setContent(new StackPane(imageView, canvas));
+            scrollPane.setFitToWidth(true);
+            scrollPane.setFitToHeight(true);
             logger.info("ScrollPane layout updated");
         }
     }
