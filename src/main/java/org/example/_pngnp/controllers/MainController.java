@@ -157,13 +157,13 @@ public class MainController {
         logger.info("Button image set for: " + button.getId());
     }
 
-    // Установка модели изображения
+    // Метод установки модели изображения
     public void setModel(ImageModel model) {
         this.model = model;
         logger.info("Image model set");
     }
 
-    // Установка основного окна приложения
+    // Метод установки основного окна приложения
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         logger.info("Primary stage set");
@@ -217,7 +217,7 @@ public class MainController {
 
     }
 
-    // Загрузка изображения
+    // Метод для кнопки загрузка изображения
     @FXML
     private void loadImage() {
         FileChooser fileChooser = new FileChooser();
@@ -237,7 +237,7 @@ public class MainController {
         }
     }
 
-    // Сохранение изображения
+    // Метод для кнопки сохранения изображения
     @FXML
     private void saveImage() {
         FileChooser fileChooser = new FileChooser();
@@ -269,7 +269,7 @@ public class MainController {
         }
     }
 
-    // Объединение изображения с содержимым холста
+    // Метод объединения изображения с содержимым холста
     private WritableImage combineImageWithCanvas(javafx.scene.image.Image image) {
         int width = (int) image.getWidth();
         int height = (int) image.getHeight();
@@ -312,7 +312,19 @@ public class MainController {
         return name.substring(lastIndexOf + 1);
     }
 
-    // Увеличение масштаба
+    // Метод для кнопки отмены действия
+    @FXML
+    private void undo() {
+
+    }
+
+    // Метод для кнопки возврата отмены действя
+    @FXML
+    private void redo() {
+
+    }
+
+    // Метод для кнопки увеличения масштаба
     @FXML
     private void increaseZoom() {
         zoomLevel += 0.1;
@@ -320,7 +332,7 @@ public class MainController {
         logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
     }
 
-    // Уменьшение масштаба
+    // Метод для кнопки уменьшения масштаба
     @FXML
     private void decreaseZoom() {
         zoomLevel -= 0.1;
@@ -331,7 +343,7 @@ public class MainController {
         logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
     }
 
-    // Обновление масштаба
+    // Метод обновления масштабов imageView и canvas
     private void updateZoom() {
         double newWidth = imageView.getImage().getWidth() * zoomLevel;
         double newHeight = imageView.getImage().getHeight() * zoomLevel;
@@ -350,7 +362,7 @@ public class MainController {
         logger.info("Zoom level updated to: " + zoomLevel);
     }
 
-    // Обновление размеров ScrollPane
+    // Метод обновления размеров ScrollPane
     private void updateScrollPane() {
         if (scrollPane != null) {
             scrollPane.layout();

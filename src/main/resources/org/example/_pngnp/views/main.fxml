@@ -56,8 +56,8 @@
         <HBox styleClass="footer">
             <!-- Контейнер для кнопок отмены и повтора действий -->
             <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
-                <Button styleClass="button" text="Undo" />
-                <Button styleClass="button" text="Redo" />
+                <Button styleClass="button" text="Undo" onAction="#undo" />
+                <Button styleClass="button" text="Redo" onAction="#redo" />
             </HBox>
             <!-- Контейнер для управления масштабом -->
             <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
