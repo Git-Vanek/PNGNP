@@ -32,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Stack;
 
 // Основной контроллер для управления интерфейсом и логикой приложения
 public class MainController {
@@ -91,19 +92,26 @@ public class MainController {
     // Флаг перетаскивания
     private boolean dragging = false;
 
+    // Переменная для отслеживания текущего режима
+    private String currentMode = "DRAG";
+
+    // Стеки для отмены и возврата отмены действий
+    private final Stack<ImageModel> undoStack = new Stack<>();
+    private final Stack<ImageModel> redoStack = new Stack<>();
+
     // Инициализация компонентов и обработчиков событий
     @FXML
     public void initialize() {
         logger.info("Initializing MainController");
         // Установка иконок для кнопок
-        setButtonImage(button_toggle_mode, "/org/example/_pngnp/images/toggle.png");
         setButtonImage(button_draw_mode, "/org/example/_pngnp/images/draw.png");
         setButtonImage(button_crop_mode, "/org/example/_pngnp/images/crop.png");
-        setButtonImage(button_text_mode, "/org/example/_pngnp/images/text.png");
         setButtonImage(button_stickers_mode, "/org/example/_pngnp/images/stickers.png");
         setButtonImage(button_filters_mode, "/org/example/_pngnp/images/filters.png");
         setButtonImage(button_layers_mode, "/org/example/_pngnp/images/layers.png");
         setButtonImage(button_brightness_and_contrast_mode, "/org/example/_pngnp/images/brightness_and_contrast.png");
+        setButtonImage(button_toggle_mode, "/org/example/_pngnp/images/toggle.png");
+        setButtonImage(button_text_mode, "/org/example/_pngnp/images/text.png");
 
         // Установка обработчиков для поля ввода масштаба
         if (zoomTextField != null) {
@@ -123,28 +131,36 @@ public class MainController {
 
         // Установка обработчиков событий мыши для перемещения изображения
         if (scrollPane != null) {
-            scrollPane.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-                mouseX = event.getSceneX();
-                mouseY = event.getSceneY();
-                dragging = true;
-            });
-
-            scrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, event -> {
-                if (dragging) {
-                    double deltaX = event.getSceneX() - mouseX;
-                    double deltaY = event.getSceneY() - mouseY;
-                    scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / scrollPane.getContent().getBoundsInLocal().getWidth());
-                    scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getContent().getBoundsInLocal().getHeight());
-                    mouseX = event.getSceneX();
-                    mouseY = event.getSceneY();
-                }
-            });
-
-            scrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, event -> {
-                dragging = false;
-                logger.info("Mouse released");
-            });
+            scrollPane.addEventFilter(MouseEvent.MOUSE_PRESSED, this::scrollPaneEventMousePressed);
+            scrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::scrollPaneEventMouseDragged);
+            scrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, this::scrollPaneEventMouseReleased);
         }
+    }
+
+    // Обрабочик нажатия мыши
+    private void scrollPaneEventMousePressed(MouseEvent event) {
+        if (currentMode.equals("DRAG")) {
+            mouseX = event.getSceneX();
+            mouseY = event.getSceneY();
+            dragging = true;
+        }
+    }
+
+    // Обрабочик задержания мыши
+    private void scrollPaneEventMouseDragged(MouseEvent event) {
+        if (currentMode.equals("DRAG") && dragging) {
+            double deltaX = event.getSceneX() - mouseX;
+            double deltaY = event.getSceneY() - mouseY;
+            scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / scrollPane.getContent().getBoundsInLocal().getWidth());
+            scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getContent().getBoundsInLocal().getHeight());
+            mouseX = event.getSceneX();
+            mouseY = event.getSceneY();
+        }
+    }
+
+    // Обрабочик окончания задержания мыши
+    private void scrollPaneEventMouseReleased(MouseEvent event) {
+        dragging = false;
     }
 
     // Метод установки иконки для кнопки
@@ -172,49 +188,57 @@ public class MainController {
     // Метод для кнопки переключения на режим перемещения
     @FXML
     private void toggleMode() {
-
+        currentMode = "DRAG";
+        logger.info("Switched to Drag Mode");
     }
 
     // Метод для кнопки переключения на режим рисования
     @FXML
     private void drawMode() {
-
+        currentMode = "DRAW";
+        logger.info("Switched to Draw Mode");
     }
 
     // Метод для кнопки переключения на режим редактирования
     @FXML
     private void cropMode() {
-
+        currentMode = "CROP";
+        logger.info("Switched to Crop Mode");
     }
 
     // Метод для кнопки переключения на режим работы с текстом
     @FXML
     private void textMode() {
-
+        currentMode = "TEXT";
+        logger.info("Switched to Text Mode");
     }
 
     // Метод для кнопки переключения на режим работы со стикерами
     @FXML
     private void stickersMode() {
-
+        currentMode = "STICKERS";
+        logger.info("Switched to Stickers Mode");
     }
 
     // Метод для кнопки переключения на режим работы с фильтрами
     @FXML
     private void filtersMode() {
-
+        currentMode = "FILTERS";
+        logger.info("Switched to Filters Mode");
     }
 
     // Метод для кнопки переключения на режим работы со слоями
     @FXML
     private void layersMode() {
-
+        currentMode = "LAYERS";
+        logger.info("Switched to Layers Mode");
     }
 
-    // Метод для кнопки переключения на режим
+    // Метод для кнопки переключения на режим яркости и контраста
     @FXML
     private void brightnessAndContrastMode() {
-
+        currentMode = "BRIGHTNESS_AND_CONTRAST";
+        logger.info("Switched to Brightness and Contrast Mode");
     }
 
     // Метод для кнопки загрузка изображения
@@ -307,7 +331,7 @@ public class MainController {
         String name = file.getName();
         int lastIndexOf = name.lastIndexOf(".");
         if (lastIndexOf == -1) {
-            return "png"; // формат по умолчанию
+            return "png";
         }
         return name.substring(lastIndexOf + 1);
     }
@@ -315,32 +339,66 @@ public class MainController {
     // Метод для кнопки отмены действия
     @FXML
     private void undo() {
-
+        if (!undoStack.isEmpty()) {
+            // Сохраняем текущее состояние в redoStack
+            redoStack.push(model.clone());
+            // Восстанавливаем предыдущее состояние из undoStack
+            model = undoStack.pop();
+            updateImageView();
+            logger.info("Undo action performed");
+        } else {
+            logger.warn("Undo stack is empty");
+        }
     }
 
-    // Метод для кнопки возврата отмены действя
+    // Метод для кнопки возврата отмены действия
     @FXML
     private void redo() {
+        if (!redoStack.isEmpty()) {
+            // Сохраняем текущее состояние в undoStack
+            undoStack.push(model.clone());
+            // Восстанавливаем состояние из redoStack
+            model = redoStack.pop();
+            updateImageView();
+            logger.info("Redo action performed");
+        } else {
+            logger.warn("Redo stack is empty");
+        }
+    }
 
+    // Метод для обновления ImageView
+    private void updateImageView() {
+        imageView.setImage(model.getImage());
+        updateScrollPane();
     }
 
     // Метод для кнопки увеличения масштаба
     @FXML
     private void increaseZoom() {
-        zoomLevel += 0.1;
-        updateZoom();
-        logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
+        if (imageView.getImage() != null) {
+            zoomLevel += 0.1;
+            updateZoom();
+            logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
+        }
+        else {
+            logger.info("ButtonIncreaseZoom - Image was not uploaded");
+        }
     }
 
     // Метод для кнопки уменьшения масштаба
     @FXML
     private void decreaseZoom() {
-        zoomLevel -= 0.1;
-        if (zoomLevel < 0.1) {
-            zoomLevel = 0.1;
+        if (imageView.getImage() != null) {
+            zoomLevel -= 0.1;
+            if (zoomLevel < 0.1) {
+                zoomLevel = 0.1;
+            }
+            updateZoom();
+            logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
         }
-        updateZoom();
-        logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
+        else {
+            logger.info("ButtonDecreaseZoom - Image was not uploaded");
+        }
     }
 
     // Метод обновления масштабов imageView и canvas
