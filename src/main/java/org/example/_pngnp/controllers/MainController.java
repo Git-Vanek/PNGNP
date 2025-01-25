@@ -119,9 +119,19 @@ public class MainController {
                 try {
                     double newZoomLevel = Double.parseDouble(newValue.replace("%", "")) / 100.0;
                     if (newZoomLevel > 0) {
-                        zoomLevel = newZoomLevel;
-                        updateZoom();
-                        logger.info("ZoomTextField - Zoom level changed to: " + zoomLevel);
+                        if (imageView.getImage() != null) {
+                            // Ограничение минимального и максимального значения масштаба
+                            if (newZoomLevel < 0.1) {
+                                newZoomLevel = 0.1;
+                            } else if (newZoomLevel > 5.0) {
+                                newZoomLevel = 5.0;
+                            }
+                            zoomLevel = newZoomLevel;
+                            updateZoom();
+                            logger.info("ZoomTextField - Zoom level changed to: " + zoomLevel);
+                        } else {
+                            logger.info("ZoomTextField - Image was not uploaded");
+                        }
                     }
                 } catch (NumberFormatException e) {
                     logger.warn("ZoomTextField - Invalid zoom level input: " + newValue);
@@ -377,6 +387,9 @@ public class MainController {
     private void increaseZoom() {
         if (imageView.getImage() != null) {
             zoomLevel += 0.1;
+            if (zoomLevel > 5.0) {
+                zoomLevel = 5.0;
+            }
             updateZoom();
             logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
         }
@@ -426,8 +439,11 @@ public class MainController {
             scrollPane.layout();
             // Сброс содержимого для корректного обновления
             scrollPane.setContent(null);
+            // Создание нового StackPane и установка стилей
+            StackPane stackPane = new StackPane(imageView, canvas);
+            stackPane.setStyle("-fx-background-color: #181F31;");
             // Установка нового содержимого
-            scrollPane.setContent(new StackPane(imageView, canvas));
+            scrollPane.setContent(stackPane);
             scrollPane.setFitToWidth(true);
             scrollPane.setFitToHeight(true);
             logger.info("ScrollPane layout updated");
