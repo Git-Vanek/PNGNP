@@ -16,11 +16,11 @@
             <Label styleClass="title" text="PNGNP" />
             <!-- Контейнер для кнопок загрузки и сохранения изображения -->
             <HBox styleClass="hbox" HBox.hgrow="ALWAYS">
-                <Button onAction="#loadImage" styleClass="button" text="Load Image" />
-                <Button onAction="#saveImage" styleClass="button" text="Save Image" />
+                <Button styleClass="button" text="Load Image" onAction="#loadImage" />
+                <Button styleClass="button" text="Save Image" onAction="#saveImage" />
             </HBox>
             <!-- Кнопка с вопросительным знаком -->
-            <Button styleClass="button" text="?" />
+            <Button styleClass="button" text="?" onAction="#moreInformation" />
         </HBox>
     </top>
 

@@ -12,4 +12,6 @@ module org.example._pngnp {
     opens org.example._pngnp.controllers to javafx.fxml;
     exports org.example._pngnp.models;
     opens org.example._pngnp.models to javafx.fxml;
+    exports org.example._pngnp.classes;
+    opens org.example._pngnp.classes to javafx.fxml;
 }

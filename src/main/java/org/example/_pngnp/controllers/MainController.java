@@ -24,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 // Импорт модели изображения
+import org.example._pngnp.classes.Notification;
 import org.example._pngnp.models.ImageModel;
 
 // Импорт классов для работы с изображениями и файлами
@@ -346,6 +347,12 @@ public class MainController {
         return name.substring(lastIndexOf + 1);
     }
 
+    // Метод для кнопки получения большей информации
+    @FXML
+    private void moreInformation() {
+        showNotification("More information", "More information...");
+    }
+
     // Метод для кнопки отмены действия
     @FXML
     private void undo() {
@@ -448,5 +455,11 @@ public class MainController {
             scrollPane.setFitToHeight(true);
             logger.info("ScrollPane layout updated");
         }
+    }
+
+    // Метод для создания и отображения уведомления
+    private void showNotification(String title, String message) {
+        Notification notification = new Notification(title, message);
+        notification.show();
     }
 }
