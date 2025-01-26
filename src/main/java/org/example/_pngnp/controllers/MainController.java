@@ -8,13 +8,11 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
+import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.transform.Affine;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -211,8 +209,10 @@ public class MainController {
                     logger.info("User chose to save the changes");
                     // Сохранение изменений
                     saveImage();
-                    // Закрытие окна
-                    primaryStage.close();
+                    if (!unsavedChanges) {
+                        // Закрытие окна
+                        primaryStage.close();
+                    }
                 } else if (result.get() == dontSaveButton) {
                     logger.info("User chose not to save the changes");
                     // Закрытие окна
@@ -320,15 +320,15 @@ public class MainController {
     // Метод для начала рисования
     private void startDrawing(MouseEvent event) {
         drawing = true;
-        lastX = event.getX();
-        lastY = event.getY();
+        lastX = event.getX() / zoomLevel;
+        lastY = event.getY() / zoomLevel;
     }
 
     // Метод для продолжения рисования
     private void continueDrawing(MouseEvent event) {
         if (drawing) {
-            double currentX = event.getX();
-            double currentY = event.getY();
+            double currentX = event.getX() / zoomLevel;
+            double currentY = event.getY() / zoomLevel;
             gc.strokeLine(lastX, lastY, currentX, currentY);
             lastX = currentX;
             lastY = currentY;
@@ -412,9 +412,9 @@ public class MainController {
             model.loadImage(originalPath);
             imageView.setImage(model.getImage());
             // Очистка содержимого canvas
-            if (canvas != null && gc != null) {
-                gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            }
+            canvasClear();
+            canvas.setWidth(imageView.getImage().getWidth());
+            canvas.setHeight(imageView.getImage().getHeight());
             updateZoom();
             logger.info("Image loaded from: " + originalPath);
         } else {
@@ -552,9 +552,12 @@ public class MainController {
             zoomLevel += 0.1;
             if (zoomLevel > 5.0) {
                 zoomLevel = 5.0;
+                logger.info("ButtonIncreaseZoom - Zoom level is too big");
             }
-            updateZoom();
-            logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
+            else {
+                updateZoom();
+                logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
+            }
         }
         else {
             logger.info("ButtonIncreaseZoom - Image was not uploaded");
@@ -568,16 +571,19 @@ public class MainController {
             zoomLevel -= 0.1;
             if (zoomLevel < 0.1) {
                 zoomLevel = 0.1;
+                logger.info("ButtonDecreaseZoom - Zoom level is too small");
             }
-            updateZoom();
-            logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
+            else {
+                updateZoom();
+                logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
+            }
         }
         else {
             logger.info("ButtonDecreaseZoom - Image was not uploaded");
         }
     }
 
-    // Метод обновления масштабов imageView и canvas
+    // Метод обновления масштабов imageView, canvas и содержимого canvas
     private void updateZoom() {
         // Создание новых масштабов
         double newWidth = imageView.getImage().getWidth() * zoomLevel;
@@ -587,18 +593,25 @@ public class MainController {
         imageView.setFitWidth(newWidth);
         imageView.setFitHeight(newHeight);
 
+        // Сохранение текущего содержимого canvas с прозрачным фоном
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+        canvas.snapshot(params, snapshot);
+
+        // Очистка canvas
+        canvasClear();
+
+        // Установка новых масштабов для gc
+        gc.setTransform(new Affine());
+        gc.scale(zoomLevel, zoomLevel);
+
         // Установка новых масштабов для canvas
         canvas.setWidth(newWidth);
         canvas.setHeight(newHeight);
 
-        // Сохранение текущего состояния GraphicsContext
-        gc.save();
-
-        // Установка новых масштабов для gc
-        gc.scale(zoomLevel, zoomLevel);
-
-        // Восстановление состояния GraphicsContext
-        gc.restore();
+        // Перерисовка содержимого canvas с новым масштабом
+        gc.drawImage(snapshot, 0, 0, canvas.getWidth() / zoomLevel, canvas.getHeight() / zoomLevel);
 
         // Установка новых масштабов для zoomTextField
         zoomTextField.setText(String.format("%.0f%%", zoomLevel * 100));
@@ -627,6 +640,11 @@ public class MainController {
 
             logger.info("ScrollPane layout updated");
         }
+    }
+
+    // Метод очистки содержимого canvas
+    private void canvasClear() {
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
     // Метод для создания и отображения уведомления
