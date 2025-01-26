@@ -411,12 +411,12 @@ public class MainController {
             String originalPath = file.getAbsolutePath();
             model.loadImage(originalPath);
             imageView.setImage(model.getImage());
-            updateScrollPane();
-            logger.info("Image loaded from: " + originalPath);
             // Очистка содержимого canvas
             if (canvas != null && gc != null) {
                 gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             }
+            updateZoom();
+            logger.info("Image loaded from: " + originalPath);
         } else {
             logger.warn("No image file selected");
             showNotification("Warning", "No image file selected");
@@ -579,20 +579,32 @@ public class MainController {
 
     // Метод обновления масштабов imageView и canvas
     private void updateZoom() {
+        // Создание новых масштабов
         double newWidth = imageView.getImage().getWidth() * zoomLevel;
         double newHeight = imageView.getImage().getHeight() * zoomLevel;
 
+        // Установка новых масштабов для imageView
         imageView.setFitWidth(newWidth);
         imageView.setFitHeight(newHeight);
 
+        // Установка новых масштабов для canvas
         canvas.setWidth(newWidth);
         canvas.setHeight(newHeight);
 
+        // Сохранение текущего состояния GraphicsContext
+        gc.save();
+
+        // Установка новых масштабов для gc
+        gc.scale(zoomLevel, zoomLevel);
+
+        // Восстановление состояния GraphicsContext
+        gc.restore();
+
+        // Установка новых масштабов для zoomTextField
         zoomTextField.setText(String.format("%.0f%%", zoomLevel * 100));
 
         // Обновление размеров ScrollPane
         updateScrollPane();
-
         logger.info("Zoom level updated to: " + zoomLevel);
     }
 
