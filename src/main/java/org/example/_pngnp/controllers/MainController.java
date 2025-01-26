@@ -4,11 +4,9 @@ package org.example._pngnp.controllers;
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
-import javafx.scene.control.ScrollPane;
+import javafx.scene.control.*;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelWriter;
@@ -20,6 +18,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 // Импорт классов для логирования
+import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,6 +32,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Stack;
 
 // Основной контроллер для управления интерфейсом и логикой приложения
@@ -100,10 +100,14 @@ public class MainController {
     private final Stack<ImageModel> undoStack = new Stack<>();
     private final Stack<ImageModel> redoStack = new Stack<>();
 
+    // Переменная для отслеживания наличия несохраненных изменений
+    private boolean unsavedChanges = false;
+
     // Инициализация компонентов и обработчиков событий
     @FXML
     public void initialize() {
         logger.info("Initializing MainController");
+
         // Установка иконок для кнопок
         setButtonImage(button_draw_mode, "/org/example/_pngnp/images/draw.png");
         setButtonImage(button_crop_mode, "/org/example/_pngnp/images/crop.png");
@@ -148,6 +152,72 @@ public class MainController {
         }
     }
 
+    // Метод установки модели изображения
+    public void setModel(ImageModel model) {
+        this.model = model;
+        logger.info("Image model set");
+    }
+
+    // Метод установки основного окна приложения и обработчика закрытия
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        logger.info("Primary stage set");
+
+        // Установка обработчика закрытия окна
+        if (primaryStage != null) {
+            primaryStage.setOnCloseRequest(this::handleCloseRequest);
+        }
+    }
+
+    // Обработчик закрытия окна
+    private void handleCloseRequest(WindowEvent windowEvent) {
+        if (unsavedChanges) {
+            logger.info("Displaying unsaved changes alert");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText("You have unsaved changes in the photo.");
+            alert.setContentText("Do you want to save the changes?");
+
+            ButtonType saveButton = new ButtonType("Save");
+            ButtonType dontSaveButton = new ButtonType("Don't Save");
+            ButtonType cancelButton = new ButtonType("Cancel");
+
+            alert.getButtonTypes().setAll(saveButton, dontSaveButton, cancelButton);
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent()) {
+                if (result.get() == saveButton) {
+                    logger.info("User chose to save the changes");
+                    // Сохранение изменений
+                    saveImage();
+                    // Закрытие окна
+                    primaryStage.close();
+                } else if (result.get() == dontSaveButton) {
+                    logger.info("User chose not to save the changes");
+                    // Закрытие окна
+                    primaryStage.close();
+                } else {
+                    logger.info("User chose to cancel");
+                    // Отмена закрытия окна
+                    windowEvent.consume();
+                }
+            }
+        } else {
+            // Если нет несохраненных изменений, просто закрываем окно
+            primaryStage.close();
+        }
+    }
+
+    // Метод установки иконки для кнопки
+    private void setButtonImage(Button button, String imagePath) {
+        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(30);
+        imageView.setFitHeight(30);
+        button.setGraphic(imageView);
+        logger.info("Button image set for: " + button.getId());
+    }
+
     // Обрабочик нажатия мыши
     private void scrollPaneEventMousePressed(MouseEvent event) {
         if (currentMode.equals("DRAG")) {
@@ -172,28 +242,6 @@ public class MainController {
     // Обрабочик окончания задержания мыши
     private void scrollPaneEventMouseReleased(MouseEvent event) {
         dragging = false;
-    }
-
-    // Метод установки иконки для кнопки
-    private void setButtonImage(Button button, String imagePath) {
-        Image image = new Image(Objects.requireNonNull(getClass().getResourceAsStream(imagePath)));
-        ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(30);
-        imageView.setFitHeight(30);
-        button.setGraphic(imageView);
-        logger.info("Button image set for: " + button.getId());
-    }
-
-    // Метод установки модели изображения
-    public void setModel(ImageModel model) {
-        this.model = model;
-        logger.info("Image model set");
-    }
-
-    // Метод установки основного окна приложения
-    public void setPrimaryStage(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        logger.info("Primary stage set");
     }
 
     // Метод для кнопки переключения на режим перемещения
@@ -267,8 +315,10 @@ public class MainController {
             imageView.setImage(model.getImage());
             updateScrollPane();
             logger.info("Image loaded from: " + originalPath);
+            showNotification("Success", "Image loaded successfully from: " + originalPath);
         } else {
             logger.warn("No image file selected");
+            showNotification("Warning", "No image file selected");
         }
     }
 
@@ -293,14 +343,19 @@ public class MainController {
                     String format = getFileExtension(file);
                     ImageIO.write(bufferedImage, format, file);
                     logger.info("Image saved to: " + file.getAbsolutePath());
+                    unsavedChanges = false;
+                    showNotification("Success", "Image saved successfully to: " + file.getAbsolutePath());
                 } else {
                     logger.warn("No image to save");
+                    showNotification("Warning", "No image to save");
                 }
             } catch (IOException e) {
                 logger.error("Error saving image", e);
+                showNotification("Error", "An error occurred while saving the image");
             }
         } else {
             logger.warn("No file selected for saving image");
+            showNotification("Warning", "No file selected for saving the image");
         }
     }
 
