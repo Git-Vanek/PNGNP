@@ -4,6 +4,7 @@ package org.example._pngnp.controllers;
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
@@ -87,11 +88,20 @@ public class MainController {
     // Текущий уровень масштабирования
     private double zoomLevel = 1.0;
 
+    // Флаг перетаскивания
+    private boolean dragging = false;
+
     // Координаты мыши для перетаскивания
     private double mouseX, mouseY;
 
-    // Флаг перетаскивания
-    private boolean dragging = false;
+    // Переменная для рисования
+    private GraphicsContext gc;
+
+    // Флаг рисования
+    private boolean drawing = false;
+
+    // Координаты мыши для рисования
+    private double lastX, lastY;
 
     // Переменная для отслеживания текущего режима
     private String currentMode = "DRAG";
@@ -150,6 +160,17 @@ public class MainController {
             scrollPane.addEventFilter(MouseEvent.MOUSE_DRAGGED, this::scrollPaneEventMouseDragged);
             scrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, this::scrollPaneEventMouseReleased);
         }
+
+        // Инициализация GraphicsContext для рисования на Canvas
+        gc = canvas.getGraphicsContext2D();
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(2);
+
+        // Установка обработчиков событий мыши для рисования
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::canvasEventMousePressed);
+        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::canvasEventMouseDragged);
+        canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::canvasEventMouseReleased);
+
     }
 
     // Метод установки модели изображения
@@ -218,18 +239,37 @@ public class MainController {
         logger.info("Button image set for: " + button.getId());
     }
 
-    // Обрабочик нажатия мыши
+    // Обрабочик нажатия мыши на ScrollPane
     private void scrollPaneEventMousePressed(MouseEvent event) {
         if (currentMode.equals("DRAG")) {
-            mouseX = event.getSceneX();
-            mouseY = event.getSceneY();
-            dragging = true;
+            startDragging(event);
         }
     }
 
-    // Обрабочик задержания мыши
+    // Обрабочик задержания мыши на ScrollPane
     private void scrollPaneEventMouseDragged(MouseEvent event) {
-        if (currentMode.equals("DRAG") && dragging) {
+        if (currentMode.equals("DRAG")) {
+            continueDragging(event);
+        }
+    }
+
+    // Обрабочик окончания задержания мыши на ScrollPane
+    private void scrollPaneEventMouseReleased(MouseEvent event) {
+        if (currentMode.equals("DRAG")) {
+            stopDragging();
+        }
+    }
+
+    // Метод для начала рисования
+    private void startDragging(MouseEvent event) {
+        mouseX = event.getSceneX();
+        mouseY = event.getSceneY();
+        dragging = true;
+    }
+
+    // Метод для продолжения рисования
+    private void continueDragging(MouseEvent event) {
+        if (dragging) {
             double deltaX = event.getSceneX() - mouseX;
             double deltaY = event.getSceneY() - mouseY;
             scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / scrollPane.getContent().getBoundsInLocal().getWidth());
@@ -239,9 +279,67 @@ public class MainController {
         }
     }
 
-    // Обрабочик окончания задержания мыши
-    private void scrollPaneEventMouseReleased(MouseEvent event) {
+    // Метод для завершения рисования
+    private void stopDragging() {
         dragging = false;
+    }
+
+    // Обработчик нажатия мыши на Canvas
+    private void canvasEventMousePressed(MouseEvent event) {
+        switch (currentMode) {
+            case "DRAW":
+                startDrawing(event);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Обработчик задержания мыши на Canvas
+    private void canvasEventMouseDragged(MouseEvent event) {
+        switch (currentMode) {
+            case "DRAW":
+                continueDrawing(event);
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Обработчик окончания задержания мыши на Canvas
+    private void canvasEventMouseReleased(MouseEvent event) {
+        switch (currentMode) {
+            case "DRAW":
+                stopDrawing();
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Метод для начала рисования
+    private void startDrawing(MouseEvent event) {
+        drawing = true;
+        lastX = event.getX();
+        lastY = event.getY();
+    }
+
+    // Метод для продолжения рисования
+    private void continueDrawing(MouseEvent event) {
+        if (drawing) {
+            double currentX = event.getX();
+            double currentY = event.getY();
+            gc.strokeLine(lastX, lastY, currentX, currentY);
+            lastX = currentX;
+            lastY = currentY;
+            // Установка флага несохраненных изменений
+            unsavedChanges = true;
+        }
+    }
+
+    // Метод для завершения рисования
+    private void stopDrawing() {
+        drawing = false;
     }
 
     // Метод для кнопки переключения на режим перемещения
@@ -315,7 +413,10 @@ public class MainController {
             imageView.setImage(model.getImage());
             updateScrollPane();
             logger.info("Image loaded from: " + originalPath);
-            showNotification("Success", "Image loaded successfully from: " + originalPath);
+            // Очистка содержимого canvas
+            if (canvas != null && gc != null) {
+                gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+            }
         } else {
             logger.warn("No image file selected");
             showNotification("Warning", "No image file selected");
@@ -499,15 +600,19 @@ public class MainController {
     private void updateScrollPane() {
         if (scrollPane != null) {
             scrollPane.layout();
-            // Сброс содержимого для корректного обновления
-            scrollPane.setContent(null);
-            // Создание нового StackPane и установка стилей
-            StackPane stackPane = new StackPane(imageView, canvas);
+            // Получение текущего StackPane из ScrollPane
+            StackPane stackPane = (StackPane) scrollPane.getContent();
+            // Удаление старых элементов из StackPane
+            stackPane.getChildren().clear();
+            // Добавление обновленных элементов в StackPane
+            stackPane.getChildren().addAll(imageView, canvas);
+            // Установка стилей для StackPane
             stackPane.setStyle("-fx-background-color: #181F31;");
-            // Установка нового содержимого
+            // Установка нового содержимого в ScrollPane
             scrollPane.setContent(stackPane);
             scrollPane.setFitToWidth(true);
             scrollPane.setFitToHeight(true);
+
             logger.info("ScrollPane layout updated");
         }
     }
