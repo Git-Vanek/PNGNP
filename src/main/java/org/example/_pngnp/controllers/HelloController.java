@@ -70,12 +70,23 @@ public class HelloController {
             Stage primaryStage = getStage(event, loader);
             logger.info("Primary stage obtained");
 
+            // Сохранение текущих размеров окна
+            assert primaryStage != null;
+            double currentWidth = primaryStage.getWidth();
+            double currentHeight = primaryStage.getHeight();
+            boolean isMaximized = primaryStage.isMaximized();
+
             // Создание новой сцены и установка её в основное окно
-            Scene scene = new Scene(root, 1200, 800);
+            Scene scene = new Scene(root, currentWidth - 50, currentHeight - 50);
             logger.info("Scene created");
 
-            assert primaryStage != null;
             primaryStage.setScene(scene);
+
+            // Восстановление размеров окна
+            primaryStage.setWidth(currentWidth);
+            primaryStage.setHeight(currentHeight);
+            primaryStage.setMaximized(isMaximized);
+
             primaryStage.show();
             logger.info("Main scene displayed");
         } catch (Exception e) {
@@ -97,5 +108,13 @@ public class HelloController {
             logger.error("Error occurred while getting the main controller", e);
             return null;
         }
+    }
+
+    public void onSettingsButtonClick(ActionEvent actionEvent) {
+
+    }
+
+    public void onFeedbackButtonClick(ActionEvent actionEvent) {
+
     }
 }

@@ -57,12 +57,16 @@
                 <!-- Настройки режима перемещения -->
                 <VBox styleClass="settings-vbox" fx:id="settings_toggle_mode">
                     <Label styleClass="label_FFFFFF" text="Toggle" />
-
+                    <Label styleClass="label_FFFFFF" text="Speed:" />
+                    <Slider fx:id="speedSlider" min="0.1" max="2.0" value="1.0" showTickMarks="true" showTickLabels="true" />
                 </VBox>
                 <!-- Настройки режима рисования -->
                 <VBox styleClass="settings-vbox" fx:id="settings_draw_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Draw" />
-
+                    <Label styleClass="label_FFFFFF" text="Color:" />
+                    <ColorPicker fx:id="colorPicker" />
+                    <Label styleClass="label_FFFFFF" text="Line Width:" />
+                    <Slider fx:id="lineWidthSlider" min="1" max="10" value="2" showTickMarks="true" showTickLabels="true" />
                 </VBox>
                 <!-- Настройки режима обрезания -->
                 <VBox styleClass="settings-vbox" fx:id="settings_crop_mode" visible="false">

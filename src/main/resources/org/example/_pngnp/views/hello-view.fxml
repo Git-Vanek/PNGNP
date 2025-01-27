@@ -21,7 +21,16 @@
   <!-- Элемент Label для отображения заголовка -->
   <Label styleClass="title" text="PNGNP" />
 
+  <!-- Элемент Label для отображения описания -->
+  <Label styleClass="description" text="Edit images with ease! Support for various formats, filters, and effects." />
+
   <!-- Кнопка для начала работы с приложением -->
   <Button styleClass="button" text="Start" onAction="#onStartButtonClick" />
+
+  <!-- Кнопка для настройки приложения -->
+  <Button styleClass="button" text="Settings" onAction="#onSettingsButtonClick" />
+
+  <!-- Кнопка для отправления отзыва -->
+  <Button styleClass="button" text="Feedback" onAction="#onFeedbackButtonClick" />
 
 </VBox>

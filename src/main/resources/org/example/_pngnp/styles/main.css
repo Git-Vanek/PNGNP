@@ -48,6 +48,12 @@
     -fx-text-fill: #000000;
 }
 
+/* Стиль для описания */
+.description {
+    -fx-font-size: 20px;
+    -fx-text-fill: #FFF FFF;
+}
+
 /* Стиль для текстовых полей */
 .text-field {
     -fx-background-color: #FFF FFF;
@@ -129,4 +135,9 @@
     -fx-border-width: 1px;
     -fx-padding: 10px;
     -fx-spacing: 10.0;
+}
+
+.settings-vbox {
+    -fx-padding: 10;
+    -fx-spacing: 20;
 }

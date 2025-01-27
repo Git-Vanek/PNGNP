@@ -36,6 +36,10 @@ public class HelloApplication extends Application {
             primaryStage.setScene(scene);
             primaryStage.setMinWidth(1200);
             primaryStage.setMinHeight(800);
+
+            // Установка максимального размера окна
+            primaryStage.setMaximized(true);
+
             primaryStage.show();
             logger.info("Hello scene displayed");
         } catch (Exception e) {

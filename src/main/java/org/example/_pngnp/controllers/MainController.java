@@ -109,6 +109,15 @@ public class MainController {
     @FXML
     public VBox settings_brightness_and_contrast_mode;
 
+    @FXML
+    private Slider speedSlider;
+
+    @FXML
+    private ColorPicker colorPicker;
+
+    @FXML
+    private Slider lineWidthSlider;
+
     // Текущий уровень масштабирования
     private double zoomLevel = 1.0;
 
@@ -190,14 +199,17 @@ public class MainController {
 
         // Инициализация GraphicsContext для рисования на Canvas
         gc = canvas.getGraphicsContext2D();
-        gc.setStroke(Color.BLACK);
+        gc.setStroke(Color.WHITE);
         gc.setLineWidth(2);
+
+        // Установка обработчиков событий для настроек
+        colorPicker.setOnAction(event -> gc.setStroke(colorPicker.getValue()));
+        lineWidthSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setLineWidth(newValue.doubleValue()));
 
         // Установка обработчиков событий мыши для рисования
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::canvasEventMousePressed);
         canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::canvasEventMouseDragged);
         canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::canvasEventMouseReleased);
-
     }
 
     // Метод установки модели изображения
