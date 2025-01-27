@@ -71,32 +71,46 @@
                 <!-- Настройки режима обрезания -->
                 <VBox styleClass="settings-vbox" fx:id="settings_crop_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Crop" />
-
+                    <Label styleClass="label_FFFFFF" text="Crop" />
+                    <Label styleClass="label_FFFFFF" text="Crop Area:" />
+                    <TextField fx:id="cropX" promptText="X" />
+                    <TextField fx:id="cropY" promptText="Y" />
+                    <TextField fx:id="cropWidth" promptText="Width" />
+                    <TextField fx:id="cropHeight" promptText="Height" />
+                    <Button styleClass="button" text="Apply Crop" onAction="#applyCrop" />
                 </VBox>
                 <!-- Настройки режима текста-->
                 <VBox styleClass="settings-vbox" fx:id="settings_text_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Text" />
-
+                    <Label styleClass="label_FFFFFF" text="Text" />
+                    <TextField fx:id="textInput" promptText="Enter text" />
+                    <ColorPicker fx:id="textColorPicker" />
+                    <Slider fx:id="textSizeSlider" min="10" max="50" value="20" showTickMarks="true" showTickLabels="true" />
+                    <Button styleClass="button" text="Add Text" onAction="#addText" />
                 </VBox>
                 <!-- Настройки режима стикеров -->
                 <VBox styleClass="settings-vbox" fx:id="settings_stickers_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Stickers" />
-
+                    <ComboBox fx:id="stickerComboBox" onAction="#selectSticker" />
                 </VBox>
                 <!-- Настройки режима фильтров -->
                 <VBox styleClass="settings-vbox" fx:id="settings_filters_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Filters" />
-
+                    <ComboBox fx:id="filterComboBox" onAction="#applyFilter" />
                 </VBox>
                 <!-- Настройки режима слоев -->
                 <VBox styleClass="settings-vbox" fx:id="settings_layers_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Layers" />
-
+                    <ListView fx:id="layersList" />
+                    <Button styleClass="button" text="Add Layer" onAction="#addLayer" />
+                    <Button styleClass="button" text="Remove Layer" onAction="#removeLayer" />
                 </VBox>
                 <!-- Настройки режима яркости и контраста -->
                 <VBox styleClass="settings-vbox" fx:id="settings_brightness_and_contrast_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Brightness" />
-
+                    <Slider fx:id="brightnessSlider" min="-100" max="100" value="0" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
+                    <Label styleClass="label_FFFFFF" text="Contrast" />
+                    <Slider fx:id="contrastSlider" min="-100" max="100" value="0" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
                 </VBox>
             </StackPane >
         </HBox>

@@ -16,7 +16,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.stage.FileChooser;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
+
 
 // Импорт классов для логирования
 import javafx.stage.WindowEvent;
@@ -118,6 +120,42 @@ public class MainController {
     @FXML
     private Slider lineWidthSlider;
 
+    @FXML
+    private TextField cropX;
+
+    @FXML
+    private TextField cropY;
+
+    @FXML
+    private TextField cropWidth;
+
+    @FXML
+    private TextField cropHeight;
+
+    @FXML
+    private TextField textInput;
+
+    @FXML
+    private ColorPicker textColorPicker;
+
+    @FXML
+    private Slider textSizeSlider;
+
+    @FXML
+    private ComboBox stickerComboBox;
+
+    @FXML
+    private ComboBox filterComboBox;
+
+    @FXML
+    private ListView layersList;
+
+    @FXML
+    private Slider brightnessSlider;
+
+    @FXML
+    private Slider contrastSlider;
+
     // Текущий уровень масштабирования
     private double zoomLevel = 1.0;
 
@@ -210,6 +248,19 @@ public class MainController {
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::canvasEventMousePressed);
         canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::canvasEventMouseDragged);
         canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::canvasEventMouseReleased);
+
+        // Инициализация других компонентов и обработчиков событий
+        textColorPicker.setOnAction(event -> gc.setFill(textColorPicker.getValue()));
+        textSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setFont(new Font(newValue.doubleValue())));
+
+        // Добавление стикеров в ComboBox
+        stickerComboBox.getItems().addAll("sticker1", "sticker2", "sticker3");
+
+        // Добавление фильтров в ComboBox
+        filterComboBox.getItems().addAll("Grayscale", "Sepia", "Invert");
+
+        // Инициализация списка слоев
+        layersList.getItems().addAll("Layer 1", "Layer 2", "Layer 3");
     }
 
     // Метод установки модели изображения
@@ -437,12 +488,50 @@ public class MainController {
         selectButton(button_crop_mode, settings_crop_mode);
     }
 
+    // Метод для кнопки применения обрезания
+    @FXML
+    private void applyCrop() {
+        double x = Double.parseDouble(cropX.getText());
+        double y = Double.parseDouble(cropY.getText());
+        double width = Double.parseDouble(cropWidth.getText());
+        double height = Double.parseDouble(cropHeight.getText());
+
+        // Применение обрезки к изображению
+        WritableImage croppedImage = new WritableImage((int) width, (int) height);
+        PixelReader pixelReader = imageView.getImage().getPixelReader();
+        PixelWriter pixelWriter = croppedImage.getPixelWriter();
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                pixelWriter.setArgb((int) i, (int) j, pixelReader.getArgb((int) (x + i), (int) (y + j)));
+            }
+        }
+
+        imageView.setImage(croppedImage);
+        canvas.setWidth(width);
+        canvas.setHeight(height);
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.drawImage(croppedImage, 0, 0);
+    }
+
     // Метод для кнопки переключения на режим работы с текстом
     @FXML
     private void textMode() {
         currentMode = "TEXT";
         logger.info("Switched to Text Mode");
         selectButton(button_text_mode, settings_text_mode);
+    }
+
+    // Метод для кнопки добавления текста
+    @FXML
+    private void addText() {
+        String text = textInput.getText();
+        Color color = textColorPicker.getValue();
+        double size = textSizeSlider.getValue();
+
+        gc.setFill(color);
+        gc.setFont(new Font(size));
+        gc.fillText(text, lastX, lastY);
     }
 
     // Метод для кнопки переключения на режим работы со стикерами
@@ -453,12 +542,31 @@ public class MainController {
         selectButton(button_stickers_mode, settings_stickers_mode);
     }
 
+    //
+    @FXML
+    private void selectSticker() {
+        String selectedSticker = (String) stickerComboBox.getValue();
+        Image stickerImage = new Image(getClass().getResourceAsStream("/stickers/" + selectedSticker + ".png"));
+        gc.drawImage(stickerImage, lastX, lastY);
+    }
+
+
     // Метод для кнопки переключения на режим работы с фильтрами
     @FXML
     private void filtersMode() {
         currentMode = "FILTERS";
         logger.info("Switched to Filters Mode");
         selectButton(button_filters_mode, settings_filters_mode);
+    }
+
+    //
+    @FXML
+    private void applyFilter() {
+        String selectedFilter = (String) filterComboBox.getValue();
+        Image filteredImage = model.apply1Filter(imageView.getImage());
+        imageView.setImage(filteredImage);
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.drawImage(filteredImage, 0, 0);
     }
 
     // Метод для кнопки переключения на режим работы со слоями
@@ -469,12 +577,39 @@ public class MainController {
         selectButton(button_layers_mode, settings_layers_mode);
     }
 
+    @FXML
+    private void addLayer() {
+        // Логика добавления нового слоя
+    }
+
+    @FXML
+    private void removeLayer() {
+        // Логика удаления выбранного слоя
+    }
+
     // Метод для кнопки переключения на режим яркости и контраста
     @FXML
     private void brightnessAndContrastMode() {
         currentMode = "BRIGHTNESS_AND_CONTRAST";
         logger.info("Switched to Brightness and Contrast Mode");
         selectButton(button_brightness_and_contrast_mode, settings_brightness_and_contrast_mode);
+    }
+
+    @FXML
+    private void applyBrightnessAndContrast() {
+        double brightness = brightnessSlider.getValue();
+        double contrast = contrastSlider.getValue();
+
+        Image adjustedImage = adjustBrightnessAndContrast(imageView.getImage(), brightness, contrast);
+        imageView.setImage(adjustedImage);
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        gc.drawImage(adjustedImage, 0, 0);
+    }
+
+    private Image adjustBrightnessAndContrast(Image image, double brightness, double contrast) {
+        // Применение яркости и контраста к изображению
+        // Здесь можно добавить логику для регулировки яркости и контраста
+        return image;
     }
 
     // Метод для кнопки загрузка изображения

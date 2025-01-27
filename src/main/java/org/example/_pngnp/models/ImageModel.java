@@ -44,14 +44,15 @@ public class ImageModel {
     }
 
     // Метод для применения фильтра к изображению
-    public void apply1Filter() {
+    public Image apply1Filter(Image image) {
         logger.info("Applying filter1 to image");
         // Применение фильтра к изображению
-        image = applyFilter((x, y, color) -> {
+        this.image = applyFilter((x, y, color) -> {
             // Логика фильтра
 
             return color;
         });
+        return image;
     }
 
     // Приватный метод для применения фильтра к изображению
