@@ -12,6 +12,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.stage.FileChooser;
@@ -84,6 +85,30 @@ public class MainController {
     @FXML
     private TextField zoomTextField;
 
+    @FXML
+    public VBox settings_toggle_mode;
+
+    @FXML
+    public VBox settings_draw_mode;
+
+    @FXML
+    public VBox settings_crop_mode;
+
+    @FXML
+    public VBox settings_text_mode;
+
+    @FXML
+    public VBox settings_stickers_mode;
+
+    @FXML
+    public VBox settings_filters_mode;
+
+    @FXML
+    public VBox settings_layers_mode;
+
+    @FXML
+    public VBox settings_brightness_and_contrast_mode;
+
     // Текущий уровень масштабирования
     private double zoomLevel = 1.0;
 
@@ -126,6 +151,9 @@ public class MainController {
         setButtonImage(button_brightness_and_contrast_mode, "/org/example/_pngnp/images/brightness_and_contrast.png");
         setButtonImage(button_toggle_mode, "/org/example/_pngnp/images/toggle.png");
         setButtonImage(button_text_mode, "/org/example/_pngnp/images/text.png");
+
+        // Изначально горит кнопка button_toggle_mode и показан ее контейнер
+        button_toggle_mode.getStyleClass().add("button-selected");
 
         // Установка обработчиков для поля ввода масштаба
         if (zoomTextField != null) {
@@ -346,11 +374,39 @@ public class MainController {
         drawing = false;
     }
 
+    // Метод для переключения кнопок и контейнеров
+    private void selectButton(Button button, VBox settings) {
+        // Сбросить стиль всех кнопок
+        button_toggle_mode.getStyleClass().remove("button-selected");
+        button_draw_mode.getStyleClass().remove("button-selected");
+        button_crop_mode.getStyleClass().remove("button-selected");
+        button_text_mode.getStyleClass().remove("button-selected");
+        button_stickers_mode.getStyleClass().remove("button-selected");
+        button_filters_mode.getStyleClass().remove("button-selected");
+        button_layers_mode.getStyleClass().remove("button-selected");
+        button_brightness_and_contrast_mode.getStyleClass().remove("button-selected");
+
+        // Скрыть все VBox
+        settings_toggle_mode.setVisible(false);
+        settings_draw_mode.setVisible(false);
+        settings_crop_mode.setVisible(false);
+        settings_text_mode.setVisible(false);
+        settings_stickers_mode.setVisible(false);
+        settings_filters_mode.setVisible(false);
+        settings_layers_mode.setVisible(false);
+        settings_brightness_and_contrast_mode.setVisible(false);
+
+        // Установить стиль для выбранной кнопки и показать соответствующий VBox
+        button.getStyleClass().add("button-selected");
+        settings.setVisible(true);
+    }
+
     // Метод для кнопки переключения на режим перемещения
     @FXML
     private void toggleMode() {
         currentMode = "DRAG";
         logger.info("Switched to Drag Mode");
+        selectButton(button_toggle_mode, settings_toggle_mode);
     }
 
     // Метод для кнопки переключения на режим рисования
@@ -358,6 +414,7 @@ public class MainController {
     private void drawMode() {
         currentMode = "DRAW";
         logger.info("Switched to Draw Mode");
+        selectButton(button_draw_mode, settings_draw_mode);
     }
 
     // Метод для кнопки переключения на режим редактирования
@@ -365,6 +422,7 @@ public class MainController {
     private void cropMode() {
         currentMode = "CROP";
         logger.info("Switched to Crop Mode");
+        selectButton(button_crop_mode, settings_crop_mode);
     }
 
     // Метод для кнопки переключения на режим работы с текстом
@@ -372,6 +430,7 @@ public class MainController {
     private void textMode() {
         currentMode = "TEXT";
         logger.info("Switched to Text Mode");
+        selectButton(button_text_mode, settings_text_mode);
     }
 
     // Метод для кнопки переключения на режим работы со стикерами
@@ -379,6 +438,7 @@ public class MainController {
     private void stickersMode() {
         currentMode = "STICKERS";
         logger.info("Switched to Stickers Mode");
+        selectButton(button_stickers_mode, settings_stickers_mode);
     }
 
     // Метод для кнопки переключения на режим работы с фильтрами
@@ -386,6 +446,7 @@ public class MainController {
     private void filtersMode() {
         currentMode = "FILTERS";
         logger.info("Switched to Filters Mode");
+        selectButton(button_filters_mode, settings_filters_mode);
     }
 
     // Метод для кнопки переключения на режим работы со слоями
@@ -393,6 +454,7 @@ public class MainController {
     private void layersMode() {
         currentMode = "LAYERS";
         logger.info("Switched to Layers Mode");
+        selectButton(button_layers_mode, settings_layers_mode);
     }
 
     // Метод для кнопки переключения на режим яркости и контраста
@@ -400,6 +462,7 @@ public class MainController {
     private void brightnessAndContrastMode() {
         currentMode = "BRIGHTNESS_AND_CONTRAST";
         logger.info("Switched to Brightness and Contrast Mode");
+        selectButton(button_brightness_and_contrast_mode, settings_brightness_and_contrast_mode);
     }
 
     // Метод для кнопки загрузка изображения

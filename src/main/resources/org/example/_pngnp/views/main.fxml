@@ -38,17 +38,64 @@
 
     <!-- Выдвижная панель слева с инструментами -->
     <left>
-        <VBox styleClass="left-vbox">
-            <!-- Кнопки для различных инструментов -->
-            <Button styleClass="button" fx:id="button_toggle_mode" onAction="#toggleMode" />
-            <Button styleClass="button" fx:id="button_draw_mode" onAction="#drawMode" />
-            <Button styleClass="button" fx:id="button_crop_mode" onAction="#cropMode" />
-            <Button styleClass="button" fx:id="button_text_mode" onAction="#textMode" />
-            <Button styleClass="button" fx:id="button_stickers_mode" onAction="#stickersMode" />
-            <Button styleClass="button" fx:id="button_filters_mode" onAction="#filtersMode" />
-            <Button styleClass="button" fx:id="button_layers_mode" onAction="#layersMode" />
-            <Button styleClass="button" fx:id="button_brightness_and_contrast_mode" onAction="#brightnessAndContrastMode" />
-        </VBox>
+        <HBox styleClass="left-hbox">
+            <!-- Панель с кнопками для различных инструментов -->
+            <VBox styleClass="left-vbox" >
+                <!-- Кнопки для различных инструментов -->
+                <Button styleClass="button" fx:id="button_toggle_mode" onAction="#toggleMode" />
+                <Button styleClass="button" fx:id="button_draw_mode" onAction="#drawMode" />
+                <Button styleClass="button" fx:id="button_crop_mode" onAction="#cropMode" />
+                <Button styleClass="button" fx:id="button_text_mode" onAction="#textMode" />
+                <Button styleClass="button" fx:id="button_stickers_mode" onAction="#stickersMode" />
+                <Button styleClass="button" fx:id="button_filters_mode" onAction="#filtersMode" />
+                <Button styleClass="button" fx:id="button_layers_mode" onAction="#layersMode" />
+                <Button styleClass="button" fx:id="button_brightness_and_contrast_mode" onAction="#brightnessAndContrastMode" />
+            </VBox>
+            <!-- Панель с настройками выбранного режима редактирования -->
+            <!-- VBox для каждого режима редактирования -->
+            <StackPane  styleClass="left-stack-pane">
+                <!-- Настройки режима перемещения -->
+                <VBox styleClass="settings-vbox" fx:id="settings_toggle_mode">
+                    <Label styleClass="label_FFFFFF" text="Toggle" />
+
+                </VBox>
+                <!-- Настройки режима рисования -->
+                <VBox styleClass="settings-vbox" fx:id="settings_draw_mode" visible="false">
+                    <Label styleClass="label_FFFFFF" text="Draw" />
+
+                </VBox>
+                <!-- Настройки режима обрезания -->
+                <VBox styleClass="settings-vbox" fx:id="settings_crop_mode" visible="false">
+                    <Label styleClass="label_FFFFFF" text="Crop" />
+
+                </VBox>
+                <!-- Настройки режима текста-->
+                <VBox styleClass="settings-vbox" fx:id="settings_text_mode" visible="false">
+                    <Label styleClass="label_FFFFFF" text="Text" />
+
+                </VBox>
+                <!-- Настройки режима стикеров -->
+                <VBox styleClass="settings-vbox" fx:id="settings_stickers_mode" visible="false">
+                    <Label styleClass="label_FFFFFF" text="Stickers" />
+
+                </VBox>
+                <!-- Настройки режима фильтров -->
+                <VBox styleClass="settings-vbox" fx:id="settings_filters_mode" visible="false">
+                    <Label styleClass="label_FFFFFF" text="Filters" />
+
+                </VBox>
+                <!-- Настройки режима слоев -->
+                <VBox styleClass="settings-vbox" fx:id="settings_layers_mode" visible="false">
+                    <Label styleClass="label_FFFFFF" text="Layers" />
+
+                </VBox>
+                <!-- Настройки режима яркости и контраста -->
+                <VBox styleClass="settings-vbox" fx:id="settings_brightness_and_contrast_mode" visible="false">
+                    <Label styleClass="label_FFFFFF" text="Brightness" />
+
+                </VBox>
+            </StackPane >
+        </HBox>
     </left>
 
     <!-- Нижняя панель с кнопками -->
