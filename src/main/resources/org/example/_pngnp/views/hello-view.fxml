@@ -25,12 +25,12 @@
   <Label styleClass="description" text="Edit images with ease! Support for various formats, filters, and effects." />
 
   <!-- Кнопка для начала работы с приложением -->
-  <Button styleClass="button" text="Start" onAction="#onStartButtonClick" />
+  <Button styleClass="button" text="Start" onAction="#onStartButtonClick" prefWidth="250" prefHeight="30" />
 
   <!-- Кнопка для настройки приложения -->
-  <Button styleClass="button" text="Settings" onAction="#onSettingsButtonClick" />
+  <Button styleClass="button" text="Settings" onAction="#onSettingsButtonClick" prefWidth="250" prefHeight="30" />
 
   <!-- Кнопка для отправления отзыва -->
-  <Button styleClass="button" text="Feedback" onAction="#onFeedbackButtonClick" />
+  <Button styleClass="button" text="Feedback" onAction="#onFeedbackButtonClick" prefWidth="250" prefHeight="30" />
 
 </VBox>

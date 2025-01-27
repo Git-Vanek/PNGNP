@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -21,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.example._pngnp.models.ImageModel;
 
 // Импорт утилит для работы с объектами
+import java.io.IOException;
 import java.util.Objects;
 
 // Объявление класса контроллера
@@ -111,10 +113,40 @@ public class HelloController {
     }
 
     public void onSettingsButtonClick(ActionEvent actionEvent) {
-
+        showDialog("settings");
     }
 
     public void onFeedbackButtonClick(ActionEvent actionEvent) {
+        showDialog("feedback");
+    }
 
+    private void showDialog(String title) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/" + title + "_dialog.fxml"));
+            Parent root = loader.load();
+            if (Objects.equals(title, "settings")) {
+                SettingsController controller = loader.getController();
+                Stage dialogStage = new Stage();
+                dialogStage.initModality(Modality.APPLICATION_MODAL);
+                dialogStage.setTitle(title);
+                dialogStage.setScene(new Scene(root));
+
+                controller.setDialogStage(dialogStage);
+
+                dialogStage.showAndWait();
+            } else  {
+                FeedbackController controller = loader.getController();
+                Stage dialogStage = new Stage();
+                dialogStage.initModality(Modality.APPLICATION_MODAL);
+                dialogStage.setTitle(title);
+                dialogStage.setScene(new Scene(root));
+
+                controller.setDialogStage(dialogStage);
+
+                dialogStage.showAndWait();
+            }
+        } catch (IOException e) {
+            logger.error("Error occurred during " + title + " button click", e);
+        }
     }
 }
