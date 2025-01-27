@@ -108,9 +108,9 @@
                 <!-- Настройки режима яркости и контраста -->
                 <VBox styleClass="settings-vbox" fx:id="settings_brightness_and_contrast_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="Brightness" />
-                    <Slider fx:id="brightnessSlider" min="-100" max="100" value="0" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
+                    <Slider fx:id="brightnessSlider" min="-100" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
                     <Label styleClass="label_FFFFFF" text="Contrast" />
-                    <Slider fx:id="contrastSlider" min="-100" max="100" value="0" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
+                    <Slider fx:id="contrastSlider" min="-100" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
                 </VBox>
             </StackPane >
         </HBox>

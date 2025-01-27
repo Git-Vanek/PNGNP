@@ -142,13 +142,13 @@ public class MainController {
     private Slider textSizeSlider;
 
     @FXML
-    private ComboBox stickerComboBox;
+    private ComboBox<String> stickerComboBox;
 
     @FXML
-    private ComboBox filterComboBox;
+    private ComboBox<String> filterComboBox;
 
     @FXML
-    private ListView layersList;
+    private ListView<String> layersList;
 
     @FXML
     private Slider brightnessSlider;
@@ -161,6 +161,7 @@ public class MainController {
 
     // Флаг перетаскивания
     private boolean dragging = false;
+    private double speed = 1.0;
 
     // Координаты мыши для перетаскивания
     private double mouseX, mouseY;
@@ -239,6 +240,9 @@ public class MainController {
         gc = canvas.getGraphicsContext2D();
         gc.setStroke(Color.WHITE);
         gc.setLineWidth(2);
+
+        // Инициализация обработчика изменения значения слайдера
+        speedSlider.valueProperty().addListener((observable, oldValue, newValue) -> speed = newValue.doubleValue());
 
         // Установка обработчиков событий для настроек
         colorPicker.setOnAction(event -> gc.setStroke(colorPicker.getValue()));
@@ -355,18 +359,18 @@ public class MainController {
         }
     }
 
-    // Метод для начала рисования
+    // Метод для начала перемещения
     private void startDragging(MouseEvent event) {
         mouseX = event.getSceneX();
         mouseY = event.getSceneY();
         dragging = true;
     }
 
-    // Метод для продолжения рисования
+    // Метод для продолжения перемещения
     private void continueDragging(MouseEvent event) {
         if (dragging) {
-            double deltaX = event.getSceneX() - mouseX;
-            double deltaY = event.getSceneY() - mouseY;
+            double deltaX = (event.getSceneX() - mouseX) * speed;
+            double deltaY = (event.getSceneY() - mouseY) * speed;
             scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / scrollPane.getContent().getBoundsInLocal().getWidth());
             scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getContent().getBoundsInLocal().getHeight());
             mouseX = event.getSceneX();
@@ -374,41 +378,29 @@ public class MainController {
         }
     }
 
-    // Метод для завершения рисования
+    // Метод для завершения перемешения
     private void stopDragging() {
         dragging = false;
     }
 
     // Обработчик нажатия мыши на Canvas
     private void canvasEventMousePressed(MouseEvent event) {
-        switch (currentMode) {
-            case "DRAW":
-                startDrawing(event);
-                break;
-            default:
-                break;
+        if (currentMode.equals("DRAW")) {
+            startDrawing(event);
         }
     }
 
     // Обработчик задержания мыши на Canvas
     private void canvasEventMouseDragged(MouseEvent event) {
-        switch (currentMode) {
-            case "DRAW":
-                continueDrawing(event);
-                break;
-            default:
-                break;
+        if (currentMode.equals("DRAW")) {
+            continueDrawing(event);
         }
     }
 
     // Обработчик окончания задержания мыши на Canvas
     private void canvasEventMouseReleased(MouseEvent event) {
-        switch (currentMode) {
-            case "DRAW":
-                stopDrawing();
-                break;
-            default:
-                break;
+        if (currentMode.equals("DRAW")) {
+            stopDrawing();
         }
     }
 
@@ -503,7 +495,7 @@ public class MainController {
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                pixelWriter.setArgb((int) i, (int) j, pixelReader.getArgb((int) (x + i), (int) (y + j)));
+                pixelWriter.setArgb( i, j, pixelReader.getArgb((int) (x + i), (int) (y + j)));
             }
         }
 
@@ -545,8 +537,8 @@ public class MainController {
     //
     @FXML
     private void selectSticker() {
-        String selectedSticker = (String) stickerComboBox.getValue();
-        Image stickerImage = new Image(getClass().getResourceAsStream("/stickers/" + selectedSticker + ".png"));
+        String selectedSticker = stickerComboBox.getValue();
+        Image stickerImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/stickers/" + selectedSticker + ".png")));
         gc.drawImage(stickerImage, lastX, lastY);
     }
 
@@ -562,8 +554,8 @@ public class MainController {
     //
     @FXML
     private void applyFilter() {
-        String selectedFilter = (String) filterComboBox.getValue();
-        Image filteredImage = model.apply1Filter(imageView.getImage());
+        String selectedFilter = filterComboBox.getValue();
+        Image filteredImage = model.applyFilter(imageView.getImage(), selectedFilter);
         imageView.setImage(filteredImage);
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.drawImage(filteredImage, 0, 0);
@@ -600,16 +592,10 @@ public class MainController {
         double brightness = brightnessSlider.getValue();
         double contrast = contrastSlider.getValue();
 
-        Image adjustedImage = adjustBrightnessAndContrast(imageView.getImage(), brightness, contrast);
+        Image adjustedImage = model.adjustBrightnessAndContrast(imageView.getImage(), brightness, contrast);
         imageView.setImage(adjustedImage);
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.drawImage(adjustedImage, 0, 0);
-    }
-
-    private Image adjustBrightnessAndContrast(Image image, double brightness, double contrast) {
-        // Применение яркости и контраста к изображению
-        // Здесь можно добавить логику для регулировки яркости и контраста
-        return image;
     }
 
     // Метод для кнопки загрузка изображения

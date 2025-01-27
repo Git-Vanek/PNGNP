@@ -112,11 +112,11 @@ public class HelloController {
         }
     }
 
-    public void onSettingsButtonClick(ActionEvent actionEvent) {
+    public void onSettingsButtonClick() {
         showDialog("settings");
     }
 
-    public void onFeedbackButtonClick(ActionEvent actionEvent) {
+    public void onFeedbackButtonClick() {
         showDialog("feedback");
     }
 

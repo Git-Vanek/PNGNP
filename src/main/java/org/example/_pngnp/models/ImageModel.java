@@ -44,14 +44,20 @@ public class ImageModel {
     }
 
     // Метод для применения фильтра к изображению
-    public Image apply1Filter(Image image) {
-        logger.info("Applying filter1 to image");
+    public Image applyFilter(Image image, String selectedFilter) {
+        logger.info("Applying filter to image");
         // Применение фильтра к изображению
         this.image = applyFilter((x, y, color) -> {
             // Логика фильтра
 
             return color;
         });
+        return image;
+    }
+
+    public Image adjustBrightnessAndContrast(Image image, double brightness, double contrast) {
+        // Применение яркости и контраста к изображению
+        // Здесь можно добавить логику для регулировки яркости и контраста
         return image;
     }
 
