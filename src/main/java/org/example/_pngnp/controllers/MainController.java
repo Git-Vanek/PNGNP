@@ -2,6 +2,7 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
+
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.GraphicsContext;
@@ -212,6 +213,9 @@ public class MainController {
                     if (!unsavedChanges) {
                         // Закрытие окна
                         primaryStage.close();
+                    } else {
+                        // Отмена закрытия окна
+                        windowEvent.consume();
                     }
                 } else if (result.get() == dontSaveButton) {
                     logger.info("User chose not to save the changes");
@@ -553,13 +557,11 @@ public class MainController {
             if (zoomLevel > 5.0) {
                 zoomLevel = 5.0;
                 logger.info("ButtonIncreaseZoom - Zoom level is too big");
-            }
-            else {
+            } else {
                 updateZoom();
                 logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
             }
-        }
-        else {
+        } else {
             logger.info("ButtonIncreaseZoom - Image was not uploaded");
         }
     }
@@ -572,13 +574,11 @@ public class MainController {
             if (zoomLevel < 0.1) {
                 zoomLevel = 0.1;
                 logger.info("ButtonDecreaseZoom - Zoom level is too small");
-            }
-            else {
+            } else {
                 updateZoom();
                 logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
             }
-        }
-        else {
+        } else {
             logger.info("ButtonDecreaseZoom - Image was not uploaded");
         }
     }
