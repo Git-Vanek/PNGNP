@@ -5,7 +5,8 @@ module org.example._pngnp {
     requires javafx.swing;
     requires java.desktop;
     requires org.apache.logging.log4j;
-    requires java.mail;
+    requires sendgrid.java;
+    requires java.http.client;
 
     opens org.example._pngnp to javafx.fxml;
     exports org.example._pngnp;

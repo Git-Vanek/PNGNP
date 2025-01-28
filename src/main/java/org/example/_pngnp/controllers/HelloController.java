@@ -112,37 +112,53 @@ public class HelloController {
         }
     }
 
+    // Метод для кнопки настроек
     public void onSettingsButtonClick() {
         showDialog("settings");
     }
 
+    // Метод для кнопки отзыва
     public void onFeedbackButtonClick() {
         showDialog("feedback");
     }
 
+    // Метод создания и отображения модального окна
     private void showDialog(String title) {
         try {
+            // Создание загрузчика FXML для загрузки диалогового окна
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/" + title + "_dialog.fxml"));
             Parent root = loader.load();
+
+            // Проверка типа диалогового окна и настройка соответствующего контроллера
             if (Objects.equals(title, "settings")) {
+                // Получение контроллера для диалогового окна настроек
                 SettingsController controller = loader.getController();
+                // Создание нового и настройка окна для диалога
                 Stage dialogStage = new Stage();
                 dialogStage.initModality(Modality.APPLICATION_MODAL);
                 dialogStage.setTitle(title);
-                dialogStage.setScene(new Scene(root));
+                dialogStage.setScene(new Scene(root, 400, 600));
+                // Запрет изменения размера модального окна
+                dialogStage.setResizable(false);
 
+                // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
-
+                // Отображение диалогового окна и ожидание его закрытия
                 dialogStage.showAndWait();
             } else  {
+                // Получение контроллера для диалогового окна обратной связи
                 FeedbackController controller = loader.getController();
+                // Создание нового и настройка окна для диалога
                 Stage dialogStage = new Stage();
                 dialogStage.initModality(Modality.APPLICATION_MODAL);
                 dialogStage.setTitle(title);
-                dialogStage.setScene(new Scene(root));
+                dialogStage.setScene(new Scene(root, 400, 600));
+                // Запрет изменения размера модального окна
+                dialogStage.setResizable(false);
 
+                // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
-
+                // Отображение диалогового окна и ожидание его закрытия
                 dialogStage.showAndWait();
             }
         } catch (IOException e) {

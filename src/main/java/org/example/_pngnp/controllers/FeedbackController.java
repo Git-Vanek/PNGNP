@@ -2,15 +2,16 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.util.Properties;
+import com.sendgrid.*;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 // Импорт классов для логирования
@@ -36,22 +37,22 @@ public class FeedbackController {
         this.dialogStage = dialogStage;
     }
 
-    // Метод для обработки нажатия кнопки "Send"
+    // Метод для кнопки отправить
     @FXML
-    private void onSendButtonClick(ActionEvent event) {
+    private void onSendButtonClick() {
         // Получение введенных данных
         String email = emailField.getText();
         String feedback = feedbackTextArea.getText();
 
         // Проверка данных
         if (email.isEmpty() || feedback.isEmpty()) {
-            showNotification("Error", "All fields are required.");
+            showNotification("All fields are required.");
             logger.warn("Feedback submission failed: All fields are required.");
             return;
         }
 
         if (!isValidEmail(email)) {
-            showNotification("Error", "Invalid email address.");
+            showNotification("Invalid email address.");
             logger.warn("Feedback submission failed: Invalid email address.");
             return;
         }
@@ -63,48 +64,32 @@ public class FeedbackController {
         dialogStage.close();
     }
 
-    // Метод для обработки нажатия кнопки "Cancel"
+    // Метод для кнопки отмены
     @FXML
-    private void onCancelButtonClick(ActionEvent event) {
+    private void onCancelButtonClick() {
         // Закрытие диалогового окна без отправки обратной связи
         dialogStage.close();
     }
 
     // Метод для отправки электронной почты
     private void sendEmail(String userEmail, String feedback) {
-        String to = "ki16082005@gmail.com";
-        String from = "your-email@example.com";
-        String host = "smtp.example.com";
+        Email from = new Email(userEmail);
+        String subject = "Feedback from PNGNP";
+        Email to = new Email("ki16082005@gmail.com");
+        Content content = new Content("text/plain", "From: " + userEmail + "\n\n" + feedback);
+        Mail mail = new Mail(from, subject, to, content);
 
-        // Настройки для SMTP сервера
-        Properties properties = new Properties();
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.smtp.host", host);
-        properties.put("mail.smtp.port", "587");
-
-        // Сессия для отправки электронной почты
-        Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication("your-email@example.com", "your-email-password");
-            }
-        });
-
+        SendGrid sg = new SendGrid("YOUR_SENDGRID_API_KEY");
+        Request request = new Request();
         try {
-            // Создание сообщения
-            Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(from));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-            message.setSubject("Feedback from PNGNP");
-            message.setText("From: " + userEmail + "\n\n" + feedback);
-
-            // Отправка сообщения
-            Transport.send(message);
-
-            logger.info("Email sent successfully to " + to);
-        } catch (MessagingException mex) {
-            logger.warn("Failed to send email", mex);
-            showNotification("Error", "Failed to send email. Please try again later.");
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            logger.info("Email sent successfully to " + to.getEmail());
+        } catch (IOException ex) {
+            logger.warn("Failed to send email", ex);
+            showNotification("Failed to send email. Please try again later.");
         }
     }
 
@@ -116,8 +101,8 @@ public class FeedbackController {
     }
 
     // Метод для создания и отображения уведомления
-    private void showNotification(String title, String message) {
-        Notification notification = new Notification(title, message);
+    private void showNotification(String message) {
+        Notification notification = new Notification("Error", message);
         notification.show();
     }
 }

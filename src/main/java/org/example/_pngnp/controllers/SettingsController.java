@@ -31,9 +31,11 @@ public class SettingsController {
 
     // Метод для обработки нажатия кнопки "Save"
     @FXML
-    private void onSaveButtonClick(ActionEvent event) {
+    private void onSaveButtonClick() {
+        // Получение параметров
         String setting1 = setting1Field.getText();
         String setting2 = setting2Field.getText();
+        // Сохранение параметров
 
         logger.info("Save button clicked. Setting1: {}, Setting2: {}", setting1, setting2);
         // Закрытие диалогового окна
@@ -42,7 +44,7 @@ public class SettingsController {
 
     // Метод для обработки нажатия кнопки "Cancel"
     @FXML
-    private void onCancelButtonClick(ActionEvent event) {
+    private void onCancelButtonClick() {
         logger.info("Cancel button clicked. No settings were saved.");
         // Закрытие диалогового окна без сохранения настроек
         dialogStage.close();
