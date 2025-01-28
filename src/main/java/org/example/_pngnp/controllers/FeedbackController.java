@@ -2,22 +2,20 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
+
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-
-import com.sendgrid.*;
-import com.sendgrid.helpers.mail.Mail;
-import com.sendgrid.helpers.mail.objects.Content;
-import com.sendgrid.helpers.mail.objects.Email;
-import java.io.IOException;
-import java.util.regex.Pattern;
-
-// Импорт классов для логирования
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example._pngnp.classes.Notification;
+
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 public class FeedbackController {
 
@@ -73,21 +71,39 @@ public class FeedbackController {
 
     // Метод для отправки электронной почты
     private void sendEmail(String userEmail, String feedback) {
-        Email from = new Email(userEmail);
-        String subject = "Feedback from PNGNP";
-        Email to = new Email("ki16082005@gmail.com");
-        Content content = new Content("text/plain", "From: " + userEmail + "\n\n" + feedback);
-        Mail mail = new Mail(from, subject, to, content);
-
-        SendGrid sg = new SendGrid("YOUR_SENDGRID_API_KEY");
-        Request request = new Request();
         try {
-            request.setMethod(Method.POST);
-            request.setEndpoint("mail/send");
-            request.setBody(mail.build());
-            Response response = sg.api(request);
-            logger.info("Email sent successfully to " + to.getEmail());
-        } catch (IOException ex) {
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", "smtp.gmail.com");
+            props.put("mail.smtp.port", "587");
+            props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+            props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+            String userLogin = "oscarok2005@gmail.com";
+            String userPassword = "ecua moel oizg vkyx";
+            Session session = Session.getInstance(
+                    props,
+                    new javax.mail.Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(userLogin, userPassword);
+                        }
+                    }
+            );
+            MimeMessage message = new MimeMessage(session);
+            try {
+                message.setSubject("feedback PNGNP");
+                message.setText("From: " + userEmail + "\n\n" + feedback);
+                message.setRecipients(
+                        Message.RecipientType.TO,
+                        InternetAddress.parse("test1pngnp@gmail.com")
+                );
+                session.getTransport("smtps");
+                Transport.send(message);
+                logger.info("Email sent successfully to test1pngnp@gmail.com");
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception ex) {
             logger.warn("Failed to send email", ex);
             showNotification("Failed to send email. Please try again later.");
         }
