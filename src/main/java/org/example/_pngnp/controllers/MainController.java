@@ -2,37 +2,33 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
+
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
 import javafx.stage.FileChooser;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
-
-
-// Импорт классов для логирования
-import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-// Импорт модели изображения
 import org.example._pngnp.classes.Notification;
 import org.example._pngnp.classes.Settings;
 import org.example._pngnp.models.ImageModel;
 
-// Импорт классов для работы с изображениями и файлами
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -285,9 +281,8 @@ public class MainController {
         setTheme();
 
         // Установка обработчика закрытия окна
-        if (primaryStage != null) {
-            primaryStage.setOnCloseRequest(this::handleCloseRequest);
-        }
+        primaryStage.setOnCloseRequest(windowEvent ->
+                handleUnsavedChanges(windowEvent, primaryStage::close));
     }
 
     // Метод для установки темы
@@ -310,8 +305,8 @@ public class MainController {
         }
     }
 
-    // Обработчик закрытия окна
-    private void handleCloseRequest(WindowEvent windowEvent) {
+    // Обработчик диалогов
+    private void handleUnsavedChanges(Event event, Runnable onNoUnsavedChanges) {
         if (unsavedChanges) {
             logger.info("Displaying unsaved changes alert");
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -332,25 +327,25 @@ public class MainController {
                     // Сохранение изменений
                     saveImage();
                     if (!unsavedChanges) {
-                        // Закрытие окна
-                        primaryStage.close();
+                        // Выполнение действия после сохранения
+                        onNoUnsavedChanges.run();
                     } else {
                         // Отмена закрытия окна
-                        windowEvent.consume();
+                        event.consume();
                     }
                 } else if (result.get() == dontSaveButton) {
                     logger.info("User chose not to save the changes");
-                    // Закрытие окна
-                    primaryStage.close();
+                    // Выполнение действия без сохранения
+                    onNoUnsavedChanges.run();
                 } else {
                     logger.info("User chose to cancel");
                     // Отмена закрытия окна
-                    windowEvent.consume();
+                    event.consume();
                 }
             }
         } else {
-            // Если нет несохраненных изменений, просто закрываем окно
-            primaryStage.close();
+            // Выполнение действия, если нет несохраненных изменений
+            onNoUnsavedChanges.run();
         }
     }
 
@@ -397,8 +392,10 @@ public class MainController {
         if (dragging) {
             double deltaX = (event.getSceneX() - mouseX) * speed;
             double deltaY = (event.getSceneY() - mouseY) * speed;
-            scrollPane.setHvalue(scrollPane.getHvalue() - deltaX / scrollPane.getContent().getBoundsInLocal().getWidth());
-            scrollPane.setVvalue(scrollPane.getVvalue() - deltaY / scrollPane.getContent().getBoundsInLocal().getHeight());
+            scrollPane.setHvalue(scrollPane.getHvalue() - deltaX /
+                    scrollPane.getContent().getBoundsInLocal().getWidth());
+            scrollPane.setVvalue(scrollPane.getVvalue() - deltaY /
+                    scrollPane.getContent().getBoundsInLocal().getHeight());
             mouseX = event.getSceneX();
             mouseY = event.getSceneY();
         }
@@ -564,7 +561,8 @@ public class MainController {
     @FXML
     private void selectSticker() {
         String selectedSticker = stickerComboBox.getValue();
-        Image stickerImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/stickers/" + selectedSticker + ".png")));
+        Image stickerImage = new Image(Objects.requireNonNull(getClass().
+                getResourceAsStream("/stickers/" + selectedSticker + ".png")));
         gc.drawImage(stickerImage, lastX, lastY);
     }
 
@@ -729,17 +727,17 @@ public class MainController {
         return name.substring(lastIndexOf + 1);
     }
 
-    // Метод для кнопки получения большей информации
+    // Метод для кнопки перехода на приветствующий экран
     @FXML
-    private void goBack() {
-        // Переход на приветственный экран
-        goHello();
+    private void goBack(ActionEvent event) {
+        handleUnsavedChanges(event, this::goHello);
     }
 
     private void goHello() {
         try {
             // Загрузка FXML файла для создания графического интерфейса
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/hello-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().
+                    getResource("/org/example/_pngnp/views/hello-view.fxml"));
             Parent root = loader.load();
             logger.info("Hello FXML file loaded successfully");
 
