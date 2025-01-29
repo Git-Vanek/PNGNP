@@ -22,8 +22,6 @@ public class HelloApplication extends Application {
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(HelloApplication.class);
 
-    private String themePath;
-
     // Переопределение метода start для настройки и отображения основного окна приложения
     @Override
     public void start(Stage primaryStage) {
@@ -56,7 +54,6 @@ public class HelloApplication extends Application {
             // Применение настроек темы
             HelloController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
-            controller.setTheme(themePath);
 
             primaryStage.show();
             logger.info("Hello scene displayed");
@@ -72,13 +69,6 @@ public class HelloApplication extends Application {
             Locale.setDefault(new Locale.Builder().setLanguage("ru").setRegion("RU").build());
         } else {
             Locale.setDefault(Locale.ENGLISH);
-        }
-
-        // Определение темы
-        if (settings.getTheme().equalsIgnoreCase("dark")) {
-            themePath = "/org/example/_pngnp/styles/dark-theme.css";
-        } else {
-            themePath = "/org/example/_pngnp/styles/light-theme.css";
         }
     }
 

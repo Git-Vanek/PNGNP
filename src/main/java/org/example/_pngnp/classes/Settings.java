@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class Settings {
     private String language;
-    private String theme;
+    private String themePath;
 
     // Геттеры и сеттеры
     public String getLanguage() {
@@ -19,12 +19,12 @@ public class Settings {
         this.language = language;
     }
 
-    public String getTheme() {
-        return theme;
+    public String getThemePath() {
+        return themePath;
     }
 
-    public void setTheme(String theme) {
-        this.theme = theme;
+    public void setThemePath(String themePath) {
+        this.themePath = themePath;
     }
 
     // Метод для сохранения настроек в файл
@@ -40,7 +40,7 @@ public class Settings {
             // Создание файла с дефолтными настройками
             Settings defaultSettings = new Settings();
             defaultSettings.setLanguage("english");
-            defaultSettings.setTheme("light");
+            defaultSettings.setThemePath("/org/example/_pngnp/styles/dark-theme.css");
             saveSettings(defaultSettings, filePath);
             return defaultSettings;
         }

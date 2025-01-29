@@ -31,7 +31,7 @@
 
     <!-- Поле выбора для темы приложения -->
     <Label styleClass="label_FFFFFF" text="Theme:" />
-    <ComboBox fx:id="themeComboBox" value="Light">
+    <ComboBox fx:id="themeComboBox">
         <items>
             <FXCollections fx:factory="observableArrayList">
                 <String fx:value="light" />

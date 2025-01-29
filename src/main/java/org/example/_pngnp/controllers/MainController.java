@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 
 // Импорт модели изображения
 import org.example._pngnp.classes.Notification;
+import org.example._pngnp.classes.Settings;
 import org.example._pngnp.models.ImageModel;
 
 // Импорт классов для работы с изображениями и файлами
@@ -273,10 +274,13 @@ public class MainController {
         logger.info("Image model set");
     }
 
-    // Метод установки основного окна приложения и обработчика закрытия
+    // Метод установки основного окна приложения, обработчика закрытия и темы
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         logger.info("Primary stage set");
+
+        // Установка темы
+        setTheme();
 
         // Установка обработчика закрытия окна
         if (primaryStage != null) {
@@ -285,14 +289,22 @@ public class MainController {
     }
 
     // Метод для установки темы
-    public void setTheme(String themePath) {
-        Scene scene = primaryStage.getScene();
-        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
-        if (cssPath != null) {
-            scene.getStylesheets().add(cssPath);
-            logger.info("The theme is fixed");
-        } else {
-            logger.error("CSS file not found: {}", themePath);
+    private void setTheme() {
+        // Загрузка настроек
+        try {
+            Settings settings = Settings.loadSettings("settings.json");
+            String themePath = settings.getThemePath();
+            Scene scene = primaryStage.getScene();
+            scene.getStylesheets().clear();
+            String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+            if (cssPath != null) {
+                scene.getStylesheets().add(cssPath);
+                logger.info("The theme is fixed");
+            } else {
+                logger.error("CSS file not found: {}", themePath);
+            }
+        } catch (IOException e) {
+            logger.error("Error occurred during setting theme", e);
         }
     }
 

@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example._pngnp.classes.Settings;
 import org.example._pngnp.models.ImageModel;
 
 import java.io.IOException;
@@ -28,9 +29,6 @@ public class HelloController {
 
     // Основное окно приложения
     private Stage primaryStage;
-
-    // Ссылка темы
-    private String themePath;
 
     // Аннотация FXML для связывания с элементом интерфейса
     @FXML
@@ -60,22 +58,32 @@ public class HelloController {
         }
     }
 
-    // Метод установки основного окна приложения
+    // Метод установки основного окна приложения и темы
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
         logger.info("Primary stage set");
+
+        // Установка темы
+        setTheme();
     }
 
     // Метод для установки темы
-    public void setTheme(String themePath) {
-        this.themePath = themePath;
-        Scene scene = primaryStage.getScene();
-        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
-        if (cssPath != null) {
-            scene.getStylesheets().add(cssPath);
-            logger.info("The theme is fixed");
-        } else {
-            logger.error("CSS file not found: {}", themePath);
+    private void setTheme() {
+        // Загрузка настроек
+        try {
+            Settings settings = Settings.loadSettings("settings.json");
+            String themePath = settings.getThemePath();
+            Scene scene = primaryStage.getScene();
+            scene.getStylesheets().clear();
+            String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+            if (cssPath != null) {
+                scene.getStylesheets().add(cssPath);
+                logger.info("The theme is fixed");
+            } else {
+                logger.error("CSS file not found: {}", themePath);
+            }
+        } catch (IOException e) {
+            logger.error("Error occurred during setting theme", e);
         }
     }
 
@@ -106,8 +114,6 @@ public class HelloController {
             MainController controller = loader.getController();
             // Передача ссылки на главное окно в контроллер
             controller.setPrimaryStage(primaryStage);
-            // Передача ссылки на тему в контроллер
-            controller.setTheme(themePath);
             ImageModel model = new ImageModel();
             // Передача модели в контроллер
             controller.setModel(model);
@@ -157,10 +163,11 @@ public class HelloController {
 
                 // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
-                // Передача ссылки на тему в контроллер
-                controller.setTheme(themePath);
                 // Отображение диалогового окна и ожидание его закрытия
                 dialogStage.showAndWait();
+
+                // Установка темы
+                setTheme();
             } else {
                 // Получение контроллера для диалогового окна обратной связи
                 FeedbackController controller = loader.getController();
@@ -174,8 +181,6 @@ public class HelloController {
 
                 // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
-                // Передача ссылки на тему в контроллер
-                controller.setTheme(themePath);
                 // Отображение диалогового окна и ожидание его закрытия
                 dialogStage.showAndWait();
             }

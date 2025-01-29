@@ -10,10 +10,12 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example._pngnp.classes.Notification;
+import org.example._pngnp.classes.Settings;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -31,20 +33,32 @@ public class FeedbackController {
     @FXML
     private TextArea feedbackTextArea;
 
-    // Метод для установки сцены диалога
+    // Метод для установки сцены диалога и темы
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
+        logger.info("Dialog stage set");
+
+        // Установка темы
+        setTheme();
     }
 
     // Метод для установки темы
-    public void setTheme(String themePath) {
-        Scene scene = dialogStage.getScene();
-        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
-        if (cssPath != null) {
-            scene.getStylesheets().add(cssPath);
-            logger.info("The theme is fixed");
-        } else {
-            logger.error("CSS file not found: {}", themePath);
+    private void setTheme() {
+        // Загрузка настроек
+        try {
+            Settings settings = Settings.loadSettings("settings.json");
+            String themePath = settings.getThemePath();
+            Scene scene = dialogStage.getScene();
+            scene.getStylesheets().clear();
+            String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+            if (cssPath != null) {
+                scene.getStylesheets().add(cssPath);
+                logger.info("The theme is fixed");
+            } else {
+                logger.error("CSS file not found: {}", themePath);
+            }
+        } catch (IOException e) {
+            logger.error("Error occurred during setting theme", e);
         }
     }
 
@@ -73,6 +87,13 @@ public class FeedbackController {
 
         // Закрытие диалогового окна
         dialogStage.close();
+    }
+
+    // Метод для проверки валидности адреса электронной почты
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        return pattern.matcher(email).matches();
     }
 
     // Метод для кнопки отмены
@@ -120,13 +141,6 @@ public class FeedbackController {
             logger.warn("Failed to send email", ex);
             showNotification("Failed to send email. Please try again later.");
         }
-    }
-
-    // Метод для проверки валидности адреса электронной почты
-    private boolean isValidEmail(String email) {
-        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
-        Pattern pattern = Pattern.compile(emailRegex);
-        return pattern.matcher(email).matches();
     }
 
     // Метод для создания и отображения уведомления

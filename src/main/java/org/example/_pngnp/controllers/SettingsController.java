@@ -36,21 +36,32 @@ public class SettingsController {
     @FXML
     private ComboBox<String> themeComboBox;
 
-    // Метод для установки сцены диалога
+    // Метод для установки сцены диалога и темы
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
+        logger.info("Dialog stage set");
+
+        // Установка темы
+        setTheme();
     }
 
     // Метод для установки темы
-    public void setTheme(String themePath) {
-        Scene scene = dialogStage.getScene();
-        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
-        if (cssPath != null) {
+    private void setTheme() {
+        // Загрузка настроек
+        try {
+            Settings settings = Settings.loadSettings("settings.json");
+            String themePath = settings.getThemePath();
+            Scene scene = dialogStage.getScene();
             scene.getStylesheets().clear();
-            scene.getStylesheets().add(cssPath);
-            logger.info("The theme is fixed");
-        } else {
-            logger.error("CSS file not found: {}", themePath);
+            String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+            if (cssPath != null) {
+                scene.getStylesheets().add(cssPath);
+                logger.info("The theme is fixed");
+            } else {
+                logger.error("CSS file not found: {}", themePath);
+            }
+        } catch (IOException e) {
+            logger.error("Error occurred during setting theme", e);
         }
     }
 
@@ -71,7 +82,12 @@ public class SettingsController {
         // Создание объекта настроек
         Settings settings = new Settings();
         settings.setLanguage(language);
-        settings.setTheme(theme);
+        // Определение темы
+        if (theme.equalsIgnoreCase("dark")) {
+            settings.setThemePath("/org/example/_pngnp/styles/dark-theme.css");
+        } else {
+            settings.setThemePath("/org/example/_pngnp/styles/light-theme.css");
+        }
 
         // Сохранение настроек в файл
         try {
@@ -95,11 +111,16 @@ public class SettingsController {
 
     public void initialize() {
         logger.info("Initializing SettingsController");
+
         // Загрузка настроек при инициализации
         try {
             Settings settings = Settings.loadSettings("settings.json");
             languageComboBox.setValue(settings.getLanguage());
-            themeComboBox.setValue(settings.getTheme());
+            if (settings.getThemePath().equalsIgnoreCase("/org/example/_pngnp/styles/dark-theme.css")) {
+                themeComboBox.setValue("dark");
+            } else {
+                themeComboBox.setValue("light");
+            }
             logger.info("Settings are loaded");
         } catch (IOException e) {
             logger.error("Error loading settings: ", e);
