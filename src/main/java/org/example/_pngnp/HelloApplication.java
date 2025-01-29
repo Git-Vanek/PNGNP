@@ -12,6 +12,8 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.example._pngnp.classes.Settings;
+
 // Объявление основного класса приложения, наследующегося от Application
 public class HelloApplication extends Application {
 
@@ -22,6 +24,12 @@ public class HelloApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
+            // Загрузка настроек
+            Settings settings = Settings.loadSettings("settings.json");
+
+            // Применение настроек
+            applySettings(settings, primaryStage);
+
             // Загрузка FXML файла для создания графического интерфейса
             FXMLLoader loader = new FXMLLoader(getClass().getResource("views/hello-view.fxml"));
             Parent root = loader.load();
@@ -44,6 +52,25 @@ public class HelloApplication extends Application {
             logger.info("Hello scene displayed");
         } catch (Exception e) {
             logger.error("Error occurred during application startup", e);
+        }
+    }
+
+    // Метод применения выгруженных настроек
+    private void applySettings(Settings settings, Stage stage) {
+        // Применение локализации
+        if ("Russian".equalsIgnoreCase(settings.getLanguage())) {
+            // Установка русского языка
+        } else {
+            // Установка английского языка
+        }
+
+        // Применение темы
+        if ("Dark".equalsIgnoreCase(settings.getTheme())) {
+            // stage.getScene().getStylesheets().add(getClass().getResource("/styles/dark-theme.css").toExternalForm());
+        } else if ("Light".equalsIgnoreCase(settings.getTheme())) {
+            // stage.getScene().getStylesheets().add(getClass().getResource("/styles/light-theme.css").toExternalForm());
+        } else {
+            // Установить системную тему
         }
     }
 

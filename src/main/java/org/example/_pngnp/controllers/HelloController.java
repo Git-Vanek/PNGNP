@@ -128,6 +128,7 @@ public class HelloController {
             // Создание загрузчика FXML для загрузки диалогового окна
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/" + title + "_dialog.fxml"));
             Parent root = loader.load();
+            logger.info(title + " FXML file loaded successfully");
 
             // Проверка типа диалогового окна и настройка соответствующего контроллера
             if (Objects.equals(title, "settings")) {
@@ -143,9 +144,11 @@ public class HelloController {
 
                 // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
+                logger.info("Showing " + title + " dialog stage");
                 // Отображение диалогового окна и ожидание его закрытия
                 dialogStage.showAndWait();
-            } else  {
+                logger.info(title + " dialog stage are closed");
+            } else {
                 // Получение контроллера для диалогового окна обратной связи
                 FeedbackController controller = loader.getController();
                 // Создание нового и настройка окна для диалога
@@ -159,7 +162,9 @@ public class HelloController {
                 // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
                 // Отображение диалогового окна и ожидание его закрытия
+                logger.info("Showing " + title + " dialog stage");
                 dialogStage.showAndWait();
+                logger.info(title + " dialog stage are closed");
             }
         } catch (IOException e) {
             logger.error("Error occurred during " + title + " button click", e);

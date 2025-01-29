@@ -2,7 +2,6 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
-
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.GraphicsContext;
