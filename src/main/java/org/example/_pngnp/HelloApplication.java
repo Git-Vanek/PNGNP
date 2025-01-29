@@ -33,7 +33,7 @@ public class HelloApplication extends Application {
             applySettings(settings);
 
             // Загрузка FXML файла для создания графического интерфейса
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("views/hello-view.fxml"),
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/hello-view.fxml"),
                     getResourceBundle(settings.getLanguage()));
             Parent root = loader.load();
             logger.info("Hello FXML file loaded successfully");

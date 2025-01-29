@@ -19,8 +19,8 @@
                 <Button styleClass="button" text="Load Image" onAction="#loadImage" />
                 <Button styleClass="button" text="Save Image" onAction="#saveImage" />
             </HBox>
-            <!-- Кнопка с вопросительным знаком -->
-            <Button styleClass="button" text="?" onAction="#moreInformation" />
+            <!-- Кнопка назад -->
+            <Button styleClass="button" text="Back" onAction="#goBack" />
         </HBox>
     </top>
 

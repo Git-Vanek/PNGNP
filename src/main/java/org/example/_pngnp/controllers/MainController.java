@@ -4,6 +4,8 @@ package org.example._pngnp.controllers;
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
@@ -729,8 +731,40 @@ public class MainController {
 
     // Метод для кнопки получения большей информации
     @FXML
-    private void moreInformation() {
-        showNotification("More information", "More information...");
+    private void goBack() {
+        // Переход на приветственный экран
+        goHello();
+    }
+
+    private void goHello() {
+        try {
+            // Загрузка FXML файла для создания графического интерфейса
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/hello-view.fxml"));
+            Parent root = loader.load();
+            logger.info("Hello FXML file loaded successfully");
+
+            // Создание сцены с загруженным интерфейсом
+            Scene scene = new Scene(root, 1200, 800);
+            logger.info("Scene created");
+
+            // Настройка и отображение окна
+            primaryStage.setTitle("PNGNP");
+            primaryStage.setScene(scene);
+            primaryStage.setMinWidth(1200);
+            primaryStage.setMinHeight(800);
+
+            // Установка максимального размера окна
+            primaryStage.setMaximized(true);
+
+            // Применение настроек темы
+            HelloController controller = loader.getController();
+            controller.setPrimaryStage(primaryStage);
+
+            primaryStage.show();
+            logger.info("Hello scene displayed");
+        } catch (Exception e) {
+            logger.error("Error occurred during application startup", e);
+        }
     }
 
     // Метод для кнопки отмены действия
