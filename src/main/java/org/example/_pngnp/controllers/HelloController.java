@@ -2,8 +2,8 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
+
 import javafx.animation.FadeTransition;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,15 +13,10 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-// Импорт классов для логирования
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-// Импорт модели изображения
 import org.example._pngnp.models.ImageModel;
 
-// Импорт утилит для работы с объектами
 import java.io.IOException;
 import java.util.Objects;
 
@@ -30,6 +25,12 @@ public class HelloController {
 
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(HelloController.class);
+
+    // Основное окно приложения
+    private Stage primaryStage;
+
+    // Ссылка темы
+    private String themePath;
 
     // Аннотация FXML для связывания с элементом интерфейса
     @FXML
@@ -59,21 +60,39 @@ public class HelloController {
         }
     }
 
-    // Метод обработки нажатия на кнопку "Start"
+    // Метод установки основного окна приложения
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        logger.info("Primary stage set");
+    }
+
+    // Метод для установки темы
+    public void setTheme(String themePath) {
+        this.themePath = themePath;
+        Scene scene = primaryStage.getScene();
+        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+        if (cssPath != null) {
+            scene.getStylesheets().add(cssPath);
+            logger.info("The theme is fixed");
+        } else {
+            logger.error("CSS file not found: {}", themePath);
+        }
+    }
+
+    // Метод для кнопки начать
     @FXML
-    protected void onStartButtonClick(ActionEvent event) {
+    protected void onStartButtonClick() {
+        mainStart();
+    }
+
+    private void mainStart() {
         try {
             // Загрузка нового FXML файла для основного интерфейса
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/_pngnp/views/main.fxml"));
             Parent root = loader.load();
             logger.info("Main FXML file loaded successfully");
 
-            // Получение контроллера основного интерфейса
-            Stage primaryStage = getStage(event, loader);
-            logger.info("Primary stage obtained");
-
             // Сохранение текущих размеров окна
-            assert primaryStage != null;
             double currentWidth = primaryStage.getWidth();
             double currentHeight = primaryStage.getHeight();
             boolean isMaximized = primaryStage.isMaximized();
@@ -84,6 +103,16 @@ public class HelloController {
 
             primaryStage.setScene(scene);
 
+            MainController controller = loader.getController();
+            // Передача ссылки на главное окно в контроллер
+            controller.setPrimaryStage(primaryStage);
+            // Передача ссылки на тему в контроллер
+            controller.setTheme(themePath);
+            ImageModel model = new ImageModel();
+            // Передача модели в контроллер
+            controller.setModel(model);
+            logger.info("Main controller initialized and primary stage set");
+
             // Восстановление размеров окна
             primaryStage.setWidth(currentWidth);
             primaryStage.setHeight(currentHeight);
@@ -93,22 +122,6 @@ public class HelloController {
             logger.info("Main scene displayed");
         } catch (Exception e) {
             logger.error("Error occurred during start button click", e);
-        }
-    }
-
-    // Метод получения контроллера основного интерфейса
-    private static Stage getStage(ActionEvent event, FXMLLoader loader) {
-        try {
-            MainController controller = loader.getController();
-            ImageModel model = new ImageModel();
-            Stage primaryStage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            controller.setModel(model);
-            controller.setPrimaryStage(primaryStage);
-            logger.info("Main controller initialized and primary stage set");
-            return primaryStage;
-        } catch (Exception e) {
-            logger.error("Error occurred while getting the main controller", e);
-            return null;
         }
     }
 
@@ -144,6 +157,8 @@ public class HelloController {
 
                 // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
+                // Передача ссылки на тему в контроллер
+                controller.setTheme(themePath);
                 // Отображение диалогового окна и ожидание его закрытия
                 dialogStage.showAndWait();
             } else {
@@ -159,6 +174,8 @@ public class HelloController {
 
                 // Передача ссылки на диалоговое окно в контроллер
                 controller.setDialogStage(dialogStage);
+                // Передача ссылки на тему в контроллер
+                controller.setTheme(themePath);
                 // Отображение диалогового окна и ожидание его закрытия
                 dialogStage.showAndWait();
             }

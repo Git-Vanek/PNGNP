@@ -4,6 +4,7 @@ package org.example._pngnp.controllers;
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.SnapshotParameters;
@@ -280,6 +281,18 @@ public class MainController {
         // Установка обработчика закрытия окна
         if (primaryStage != null) {
             primaryStage.setOnCloseRequest(this::handleCloseRequest);
+        }
+    }
+
+    // Метод для установки темы
+    public void setTheme(String themePath) {
+        Scene scene = primaryStage.getScene();
+        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+        if (cssPath != null) {
+            scene.getStylesheets().add(cssPath);
+            logger.info("The theme is fixed");
+        } else {
+            logger.error("CSS file not found: {}", themePath);
         }
     }
 

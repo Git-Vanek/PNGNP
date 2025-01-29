@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 
 <!-- Основной контейнер BorderPane с применением стилей и контроллера -->
-<BorderPane stylesheets="@../styles/main.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example._pngnp.controllers.MainController">
+<BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example._pngnp.controllers.MainController">
 
     <!-- Шапка -->
     <top>

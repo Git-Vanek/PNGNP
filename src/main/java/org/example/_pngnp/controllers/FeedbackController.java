@@ -2,8 +2,8 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
-
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -14,6 +14,7 @@ import org.example._pngnp.classes.Notification;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -22,17 +23,29 @@ public class FeedbackController {
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(FeedbackController.class);
 
+    private Stage dialogStage;
+
     @FXML
     private TextField emailField;
 
     @FXML
     private TextArea feedbackTextArea;
 
-    private Stage dialogStage;
-
     // Метод для установки сцены диалога
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
+    }
+
+    // Метод для установки темы
+    public void setTheme(String themePath) {
+        Scene scene = dialogStage.getScene();
+        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+        if (cssPath != null) {
+            scene.getStylesheets().add(cssPath);
+            logger.info("The theme is fixed");
+        } else {
+            logger.error("CSS file not found: {}", themePath);
+        }
     }
 
     // Метод для кнопки отправить

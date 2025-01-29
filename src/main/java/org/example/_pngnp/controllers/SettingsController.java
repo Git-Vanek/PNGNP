@@ -3,6 +3,7 @@ package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
@@ -16,19 +17,15 @@ import org.apache.logging.log4j.Logger;
 // Импорт классов для работы с настройками
 import org.example._pngnp.classes.Settings;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SettingsController {
 
-    private Stage dialogStage;
-
-    // Метод для установки сцены диалога
-    public void setDialogStage(Stage dialogStage) {
-        this.dialogStage = dialogStage;
-    }
-
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(SettingsController.class);
+
+    private Stage dialogStage;
 
     // Переменная для отслеживания наличия несохраненных изменений
     private boolean unsavedChanges = false;
@@ -38,6 +35,24 @@ public class SettingsController {
 
     @FXML
     private ComboBox<String> themeComboBox;
+
+    // Метод для установки сцены диалога
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
+    }
+
+    // Метод для установки темы
+    public void setTheme(String themePath) {
+        Scene scene = dialogStage.getScene();
+        String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+        if (cssPath != null) {
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(cssPath);
+            logger.info("The theme is fixed");
+        } else {
+            logger.error("CSS file not found: {}", themePath);
+        }
+    }
 
     // Метод для кнопки сохранить
     @FXML

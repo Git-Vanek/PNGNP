@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 
 <!-- Основной контейнер VBox с применением стилей и контроллера -->
-<VBox stylesheets="@../styles/main.css" styleClass="vbox" xmlns:fx="http://javafx.com/fxml" fx:controller="org.example._pngnp.controllers.HelloController">
+<VBox styleClass="vbox" xmlns:fx="http://javafx.com/fxml" fx:controller="org.example._pngnp.controllers.HelloController">
 
   <!-- Установка отступов для контейнера -->
   <padding>

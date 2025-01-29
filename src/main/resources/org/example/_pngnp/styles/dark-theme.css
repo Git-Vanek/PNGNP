@@ -1,0 +1,144 @@
+/* Общий стиль для всего приложения */
+.root {
+    -fx-background-color: #181F31;
+    -fx-font-family: "Arial", sans-serif;
+}
+
+/* Стиль для вертикального контейнера */
+.vbox {
+    -fx-alignment: CENTER;
+    -fx-spacing: 20.0;
+}
+
+/* Стиль для горизонтального контейнера */
+.hbox {
+    -fx-alignment: CENTER;
+    -fx-spacing: 20.0;
+}
+
+/* Стиль для кнопок */
+.button {
+    -fx-background-color: #2E2E99;
+    -fx-text-fill: #FFF FFF;
+    -fx-font-size: 18px;
+    -fx-padding: 10px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 0);
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.button:hover {
+    -fx-background-color: #6161CC;
+}
+
+/* Стиль для выбранных кнопок */
+.button-selected {
+    -fx-background-color: #6161CC;
+    -fx-text-fill: #FFF FFF;
+    -fx-font-size: 18px;
+    -fx-padding: 10px 20px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 0);
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+/* Стиль для меток */
+.label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #000000;
+}
+
+/* Стиль для описания */
+.description {
+    -fx-font-size: 20px;
+    -fx-text-fill: #FFF FFF;
+}
+
+/* Стиль для текстовых полей */
+.text-field {
+    -fx-background-color: #FFF FFF;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 2px;
+    -fx-border-radius: 3;
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+}
+
+/* Стиль для логотипа */
+.logo {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 0);
+}
+
+/* Стиль для заголовка */
+.title {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFF FFF;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0, 0, 0);
+}
+
+/* Стиль для меток на фоне */
+.label_FFFFFF {
+    -fx-font-size: 16px;
+    -fx-text-fill: #FFF FFF;
+}
+
+/* Стиль для ColorPicker */
+.color-picker {
+    -fx-background-color: #FFF FFF;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 2px;
+    -fx-border-radius: 3;
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+}
+
+/* Стили для контейнера top */
+.top-vbox {
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-alignment: CENTER;
+    -fx-spacing: 10.0;
+}
+
+/* Стили для контейнера center */
+.scroll-pane {
+    -fx-background-color: #181F31;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+}
+.stack-pane {
+    -fx-background-color: #181F31;
+}
+
+/* Стили для контейнера left */
+.left-vbox {
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-spacing: 10.0;
+}
+
+/* Стили для контейнера настроек left */
+.left-stack-pane {
+    -fx-padding: 10px;
+    -fx-spacing: 10.0;
+}
+
+
+/* Стили для контейнера footer */
+.footer {
+    -fx-alignment: CENTER;
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
+    -fx-padding: 10px;
+    -fx-spacing: 10.0;
+}
+
+/* Стили для настроек */
+.settings-vbox {
+    -fx-padding: 10;
+    -fx-spacing: 20;
+}

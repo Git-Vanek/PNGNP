@@ -2,23 +2,27 @@
 package org.example._pngnp;
 
 // Импорт необходимых классов из библиотеки JavaFX для создания графического интерфейса
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
-// Импорт классов для логирования
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import org.example._pngnp.classes.Settings;
+import org.example._pngnp.controllers.HelloController;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 // Объявление основного класса приложения, наследующегося от Application
 public class HelloApplication extends Application {
 
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(HelloApplication.class);
+
+    private String themePath;
 
     // Переопределение метода start для настройки и отображения основного окна приложения
     @Override
@@ -27,11 +31,12 @@ public class HelloApplication extends Application {
             // Загрузка настроек
             Settings settings = Settings.loadSettings("settings.json");
 
-            // Применение настроек
-            applySettings(settings, primaryStage);
+            // Получение настроек
+            applySettings(settings);
 
             // Загрузка FXML файла для создания графического интерфейса
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("views/hello-view.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("views/hello-view.fxml"),
+                    getResourceBundle(settings.getLanguage()));
             Parent root = loader.load();
             logger.info("Hello FXML file loaded successfully");
 
@@ -48,6 +53,11 @@ public class HelloApplication extends Application {
             // Установка максимального размера окна
             primaryStage.setMaximized(true);
 
+            // Применение настроек темы
+            HelloController controller = loader.getController();
+            controller.setPrimaryStage(primaryStage);
+            controller.setTheme(themePath);
+
             primaryStage.show();
             logger.info("Hello scene displayed");
         } catch (Exception e) {
@@ -55,23 +65,32 @@ public class HelloApplication extends Application {
         }
     }
 
-    // Метод применения выгруженных настроек
-    private void applySettings(Settings settings, Stage stage) {
-        // Применение локализации
-        if ("Russian".equalsIgnoreCase(settings.getLanguage())) {
-            // Установка русского языка
+    // Метод применения настроек
+    private void applySettings(Settings settings) {
+        // Определение локализации
+        if (settings.getLanguage().equalsIgnoreCase("russian")) {
+            Locale.setDefault(new Locale.Builder().setLanguage("ru").setRegion("RU").build());
         } else {
-            // Установка английского языка
+            Locale.setDefault(Locale.ENGLISH);
         }
 
-        // Применение темы
-        if ("Dark".equalsIgnoreCase(settings.getTheme())) {
-            // stage.getScene().getStylesheets().add(getClass().getResource("/styles/dark-theme.css").toExternalForm());
-        } else if ("Light".equalsIgnoreCase(settings.getTheme())) {
-            // stage.getScene().getStylesheets().add(getClass().getResource("/styles/light-theme.css").toExternalForm());
+        // Определение темы
+        if (settings.getTheme().equalsIgnoreCase("dark")) {
+            themePath = "/org/example/_pngnp/styles/dark-theme.css";
         } else {
-            // Установить системную тему
+            themePath = "/org/example/_pngnp/styles/light-theme.css";
         }
+    }
+
+    // Метод для получения ResourceBundle в зависимости от языка
+    private ResourceBundle getResourceBundle(String language) {
+        if (language.equalsIgnoreCase("russian")) {
+            logger.info("Russian localisation is fixed");
+            return ResourceBundle.getBundle("org.example._pngnp.messages", new Locale.Builder().
+                    setLanguage("ru").setRegion("RU").build());
+        }
+        logger.info("English localisation is fixed");
+        return ResourceBundle.getBundle("org.example._pngnp.messages", Locale.ENGLISH);
     }
 
     // Переопределение метода stop для записи лога о завершении работы приложения
