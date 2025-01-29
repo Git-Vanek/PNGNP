@@ -2,7 +2,6 @@
 package org.example._pngnp;
 
 // Импорт необходимых классов из библиотеки JavaFX для создания графического интерфейса
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,7 +13,6 @@ import org.example._pngnp.classes.Settings;
 import org.example._pngnp.controllers.HelloController;
 
 import java.util.Locale;
-import java.util.ResourceBundle;
 
 // Объявление основного класса приложения, наследующегося от Application
 public class HelloApplication extends Application {
@@ -34,8 +32,7 @@ public class HelloApplication extends Application {
 
             // Загрузка FXML файла для создания графического интерфейса
             FXMLLoader loader = new FXMLLoader(getClass().
-                    getResource("/org/example/_pngnp/views/hello-view.fxml"),
-                    getResourceBundle(settings.getLanguage()));
+                    getResource("/org/example/_pngnp/views/hello-view.fxml"));
             Parent root = loader.load();
             logger.info("Hello FXML file loaded successfully");
 
@@ -52,9 +49,9 @@ public class HelloApplication extends Application {
             // Установка максимального размера окна
             primaryStage.setMaximized(true);
 
-            // Применение настроек темы
+            // Передача параметров в контроллер
             HelloController controller = loader.getController();
-            controller.setPrimaryStage(primaryStage);
+            controller.setProperties(primaryStage);
 
             primaryStage.show();
             logger.info("Hello scene displayed");
@@ -71,17 +68,6 @@ public class HelloApplication extends Application {
         } else {
             Locale.setDefault(Locale.ENGLISH);
         }
-    }
-
-    // Метод для получения ResourceBundle в зависимости от языка
-    private ResourceBundle getResourceBundle(String language) {
-        if (language.equalsIgnoreCase("russian")) {
-            logger.info("Russian localisation is fixed");
-            return ResourceBundle.getBundle("org.example._pngnp.messages", new Locale.Builder().
-                    setLanguage("ru").setRegion("RU").build());
-        }
-        logger.info("English localisation is fixed");
-        return ResourceBundle.getBundle("org.example._pngnp.messages", Locale.ENGLISH);
     }
 
     // Переопределение метода stop для записи лога о завершении работы приложения

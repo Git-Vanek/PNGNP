@@ -18,6 +18,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 public class FeedbackController {
@@ -26,6 +27,7 @@ public class FeedbackController {
     private static final Logger logger = LogManager.getLogger(FeedbackController.class);
 
     private Stage dialogStage;
+    private ResourceBundle resources;
 
     @FXML
     private TextField emailField;
@@ -33,13 +35,14 @@ public class FeedbackController {
     @FXML
     private TextArea feedbackTextArea;
 
-    // Метод для установки сцены диалога и темы
-    public void setDialogStage(Stage dialogStage) {
+    // Метод для установки значений
+    public void setProperties(Stage dialogStage, ResourceBundle resources) {
         this.dialogStage = dialogStage;
-        logger.info("Dialog stage set");
+        this.resources = resources;
 
         // Установка темы
         setTheme();
+        logger.info("Properties set");
     }
 
     // Метод для установки темы
@@ -71,14 +74,12 @@ public class FeedbackController {
 
         // Проверка данных
         if (email.isEmpty() || feedback.isEmpty()) {
-            showNotification("All fields are required.");
-            logger.warn("Feedback submission failed: All fields are required.");
+            showNotification(resources.getString("notification_all_fields_required"));
             return;
         }
 
         if (!isValidEmail(email)) {
-            showNotification("Invalid email address.");
-            logger.warn("Feedback submission failed: Invalid email address.");
+            showNotification(resources.getString("notification_invalid_email"));
             return;
         }
 
@@ -94,13 +95,6 @@ public class FeedbackController {
         String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
         Pattern pattern = Pattern.compile(emailRegex);
         return pattern.matcher(email).matches();
-    }
-
-    // Метод для кнопки отмены
-    @FXML
-    private void onCancelButtonClick() {
-        // Закрытие диалогового окна без отправки обратной связи
-        dialogStage.close();
     }
 
     // Метод для отправки электронной почты
@@ -139,7 +133,7 @@ public class FeedbackController {
             }
         } catch (Exception ex) {
             logger.warn("Failed to send email", ex);
-            showNotification("Failed to send email. Please try again later.");
+            showNotification(resources.getString("notification_failed_to_send_email"));
         }
     }
 
@@ -147,5 +141,12 @@ public class FeedbackController {
     private void showNotification(String message) {
         Notification notification = new Notification("Error", message);
         notification.show();
+    }
+
+    // Метод для кнопки отмены
+    @FXML
+    private void onCancelButtonClick() {
+        // Закрытие диалогового окна без отправки обратной связи
+        dialogStage.close();
     }
 }

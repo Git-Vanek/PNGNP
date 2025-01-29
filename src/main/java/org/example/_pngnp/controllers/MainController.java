@@ -43,11 +43,40 @@ public class MainController {
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(MainController.class);
 
-    // Модель изображения
+    // Модель
     private ImageModel model;
 
-    // Основное окно приложения
+    // Главное окно
     private Stage primaryStage;
+
+    // Текущий уровень масштабирования
+    private double zoomLevel = 1.0;
+
+    // Флаг перетаскивания
+    private boolean dragging = false;
+    private double speed = 1.0;
+
+    // Координаты мыши для перетаскивания
+    private double mouseX, mouseY;
+
+    // Переменная для рисования
+    private GraphicsContext gc;
+
+    // Флаг рисования
+    private boolean drawing = false;
+
+    // Координаты мыши для рисования
+    private double lastX, lastY;
+
+    // Переменная для отслеживания текущего режима
+    private String currentMode = "DRAG";
+
+    // Стеки для отмены и возврата отмены действий
+    private final Stack<ImageModel> undoStack = new Stack<>();
+    private final Stack<ImageModel> redoStack = new Stack<>();
+
+    // Переменная для отслеживания наличия несохраненных изменений
+    private boolean unsavedChanges = false;
 
     // Аннотации FXML для связывания с элементами интерфейса
     @FXML
@@ -155,34 +184,44 @@ public class MainController {
     @FXML
     private Slider contrastSlider;
 
-    // Текущий уровень масштабирования
-    private double zoomLevel = 1.0;
+    // Метод установки модели изображения
+    public void setModel(ImageModel model) {
+        this.model = model;
+        logger.info("Image model set");
+    }
 
-    // Флаг перетаскивания
-    private boolean dragging = false;
-    private double speed = 1.0;
+    // Метод установки основного окна приложения, обработчика закрытия и темы
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        logger.info("Primary stage set");
 
-    // Координаты мыши для перетаскивания
-    private double mouseX, mouseY;
+        // Установка темы
+        setTheme();
 
-    // Переменная для рисования
-    private GraphicsContext gc;
+        // Установка обработчика закрытия окна
+        primaryStage.setOnCloseRequest(windowEvent ->
+                handleUnsavedChanges(windowEvent, primaryStage::close));
+    }
 
-    // Флаг рисования
-    private boolean drawing = false;
-
-    // Координаты мыши для рисования
-    private double lastX, lastY;
-
-    // Переменная для отслеживания текущего режима
-    private String currentMode = "DRAG";
-
-    // Стеки для отмены и возврата отмены действий
-    private final Stack<ImageModel> undoStack = new Stack<>();
-    private final Stack<ImageModel> redoStack = new Stack<>();
-
-    // Переменная для отслеживания наличия несохраненных изменений
-    private boolean unsavedChanges = false;
+    // Метод для установки темы
+    private void setTheme() {
+        // Загрузка настроек
+        try {
+            Settings settings = Settings.loadSettings("settings.json");
+            String themePath = settings.getThemePath();
+            Scene scene = primaryStage.getScene();
+            scene.getStylesheets().clear();
+            String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
+            if (cssPath != null) {
+                scene.getStylesheets().add(cssPath);
+                logger.info("The theme is fixed");
+            } else {
+                logger.error("CSS file not found: {}", themePath);
+            }
+        } catch (IOException e) {
+            logger.error("Error occurred during setting theme", e);
+        }
+    }
 
     // Инициализация компонентов и обработчиков событий
     @FXML
@@ -264,45 +303,6 @@ public class MainController {
 
         // Инициализация списка слоев
         layersList.getItems().addAll("Layer 1", "Layer 2", "Layer 3");
-    }
-
-    // Метод установки модели изображения
-    public void setModel(ImageModel model) {
-        this.model = model;
-        logger.info("Image model set");
-    }
-
-    // Метод установки основного окна приложения, обработчика закрытия и темы
-    public void setPrimaryStage(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        logger.info("Primary stage set");
-
-        // Установка темы
-        setTheme();
-
-        // Установка обработчика закрытия окна
-        primaryStage.setOnCloseRequest(windowEvent ->
-                handleUnsavedChanges(windowEvent, primaryStage::close));
-    }
-
-    // Метод для установки темы
-    private void setTheme() {
-        // Загрузка настроек
-        try {
-            Settings settings = Settings.loadSettings("settings.json");
-            String themePath = settings.getThemePath();
-            Scene scene = primaryStage.getScene();
-            scene.getStylesheets().clear();
-            String cssPath = Objects.requireNonNull(getClass().getResource(themePath)).toExternalForm();
-            if (cssPath != null) {
-                scene.getStylesheets().add(cssPath);
-                logger.info("The theme is fixed");
-            } else {
-                logger.error("CSS file not found: {}", themePath);
-            }
-        } catch (IOException e) {
-            logger.error("Error occurred during setting theme", e);
-        }
     }
 
     // Обработчик диалогов
@@ -450,6 +450,149 @@ public class MainController {
     // Метод для завершения рисования
     private void stopDrawing() {
         drawing = false;
+    }
+
+    // Метод для кнопки загрузка изображения
+    @FXML
+    private void loadImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Image File");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.bmp")
+        );
+        File file = fileChooser.showOpenDialog(primaryStage);
+        if (file != null) {
+            String originalPath = file.getAbsolutePath();
+            model.loadImage(originalPath);
+            imageView.setImage(model.getImage());
+            // Очистка содержимого canvas
+            canvasClear();
+            canvas.setWidth(imageView.getImage().getWidth());
+            canvas.setHeight(imageView.getImage().getHeight());
+            updateZoom();
+            logger.info("Image loaded from: {}", originalPath);
+        } else {
+            logger.warn("No image file selected");
+            showNotification("Warning", "No image file selected");
+        }
+    }
+
+    // Метод для кнопки сохранения изображения
+    @FXML
+    private void saveImage() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Image File");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("PNG Files", "*.png"),
+                new FileChooser.ExtensionFilter("JPEG Files", "*.jpg"),
+                new FileChooser.ExtensionFilter("BMP Files", "*.bmp")
+        );
+        File file = fileChooser.showSaveDialog(primaryStage);
+        if (file != null) {
+            try {
+                javafx.scene.image.Image image = model.getImage();
+                if (image != null) {
+                    // Объединение изображения с содержимым холста
+                    WritableImage combinedImage = combineImageWithCanvas(image);
+                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(combinedImage, null);
+                    String format = getFileExtension(file);
+                    ImageIO.write(bufferedImage, format, file);
+                    logger.info("Image saved to: {}", file.getAbsolutePath());
+                    unsavedChanges = false;
+                    showNotification("Success", "Image saved successfully to: " + file.getAbsolutePath());
+                } else {
+                    logger.warn("No image to save");
+                    showNotification("Warning", "No image to save");
+                }
+            } catch (IOException e) {
+                logger.error("Error saving image", e);
+                showNotification("Error", "An error occurred while saving the image");
+            }
+        } else {
+            logger.warn("No file selected for saving image");
+            showNotification("Warning", "No file selected for saving the image");
+        }
+    }
+
+    // Метод объединения изображения с содержимым холста
+    private WritableImage combineImageWithCanvas(javafx.scene.image.Image image) {
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        WritableImage combinedImage = new WritableImage(width, height);
+        PixelWriter writer = combinedImage.getPixelWriter();
+
+        // Рисование изображения на объединенное изображение
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                writer.setColor(x, y, image.getPixelReader().getColor(x, y));
+            }
+        }
+
+        // Рисование содержимого холста на объединенное изображение
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        WritableImage canvasImage = canvas.snapshot(params, null);
+        int canvasWidth = (int) canvas.getWidth();
+        int canvasHeight = (int) canvas.getHeight();
+
+        for (int y = 0; y < Math.min(height, canvasHeight); y++) {
+            for (int x = 0; x < Math.min(width, canvasWidth); x++) {
+                Color canvasColor = canvasImage.getPixelReader().getColor(x, y);
+                if (canvasColor.getOpacity() > 0) {
+                    writer.setColor(x, y, canvasColor);
+                }
+            }
+        }
+
+        return combinedImage;
+    }
+
+    // Получение расширения файла
+    private String getFileExtension(File file) {
+        String name = file.getName();
+        int lastIndexOf = name.lastIndexOf(".");
+        if (lastIndexOf == -1) {
+            return "png";
+        }
+        return name.substring(lastIndexOf + 1);
+    }
+
+    // Метод для кнопки перехода на приветствующий экран
+    @FXML
+    private void goBack(ActionEvent event) {
+        handleUnsavedChanges(event, this::goHello);
+    }
+
+    private void goHello() {
+        try {
+            // Загрузка FXML файла для создания графического интерфейса
+            FXMLLoader loader = new FXMLLoader(getClass().
+                    getResource("/org/example/_pngnp/views/hello-view.fxml"));
+            Parent root = loader.load();
+            logger.info("Hello FXML file loaded successfully");
+
+            // Создание сцены с загруженным интерфейсом
+            Scene scene = new Scene(root, 1200, 800);
+            logger.info("Scene created");
+
+            // Настройка и отображение окна
+            primaryStage.setTitle("PNGNP");
+            primaryStage.setScene(scene);
+            primaryStage.setMinWidth(1200);
+            primaryStage.setMinHeight(800);
+
+            // Установка максимального размера окна
+            primaryStage.setMaximized(true);
+
+            // Применение настроек темы
+            HelloController controller = loader.getController();
+            controller.setProperties(primaryStage);
+
+            primaryStage.show();
+            logger.info("Hello scene displayed");
+        } catch (Exception e) {
+            logger.error("Error occurred during application startup", e);
+        }
     }
 
     // Метод для переключения кнопок и контейнеров
@@ -620,149 +763,6 @@ public class MainController {
         imageView.setImage(adjustedImage);
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         gc.drawImage(adjustedImage, 0, 0);
-    }
-
-    // Метод для кнопки загрузка изображения
-    @FXML
-    private void loadImage() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Image File");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.bmp")
-        );
-        File file = fileChooser.showOpenDialog(primaryStage);
-        if (file != null) {
-            String originalPath = file.getAbsolutePath();
-            model.loadImage(originalPath);
-            imageView.setImage(model.getImage());
-            // Очистка содержимого canvas
-            canvasClear();
-            canvas.setWidth(imageView.getImage().getWidth());
-            canvas.setHeight(imageView.getImage().getHeight());
-            updateZoom();
-            logger.info("Image loaded from: {}", originalPath);
-        } else {
-            logger.warn("No image file selected");
-            showNotification("Warning", "No image file selected");
-        }
-    }
-
-    // Метод для кнопки сохранения изображения
-    @FXML
-    private void saveImage() {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Image File");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("PNG Files", "*.png"),
-                new FileChooser.ExtensionFilter("JPEG Files", "*.jpg"),
-                new FileChooser.ExtensionFilter("BMP Files", "*.bmp")
-        );
-        File file = fileChooser.showSaveDialog(primaryStage);
-        if (file != null) {
-            try {
-                javafx.scene.image.Image image = model.getImage();
-                if (image != null) {
-                    // Объединение изображения с содержимым холста
-                    WritableImage combinedImage = combineImageWithCanvas(image);
-                    BufferedImage bufferedImage = SwingFXUtils.fromFXImage(combinedImage, null);
-                    String format = getFileExtension(file);
-                    ImageIO.write(bufferedImage, format, file);
-                    logger.info("Image saved to: {}", file.getAbsolutePath());
-                    unsavedChanges = false;
-                    showNotification("Success", "Image saved successfully to: " + file.getAbsolutePath());
-                } else {
-                    logger.warn("No image to save");
-                    showNotification("Warning", "No image to save");
-                }
-            } catch (IOException e) {
-                logger.error("Error saving image", e);
-                showNotification("Error", "An error occurred while saving the image");
-            }
-        } else {
-            logger.warn("No file selected for saving image");
-            showNotification("Warning", "No file selected for saving the image");
-        }
-    }
-
-    // Метод объединения изображения с содержимым холста
-    private WritableImage combineImageWithCanvas(javafx.scene.image.Image image) {
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
-        WritableImage combinedImage = new WritableImage(width, height);
-        PixelWriter writer = combinedImage.getPixelWriter();
-
-        // Рисование изображения на объединенное изображение
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                writer.setColor(x, y, image.getPixelReader().getColor(x, y));
-            }
-        }
-
-        // Рисование содержимого холста на объединенное изображение
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-        WritableImage canvasImage = canvas.snapshot(params, null);
-        int canvasWidth = (int) canvas.getWidth();
-        int canvasHeight = (int) canvas.getHeight();
-
-        for (int y = 0; y < Math.min(height, canvasHeight); y++) {
-            for (int x = 0; x < Math.min(width, canvasWidth); x++) {
-                Color canvasColor = canvasImage.getPixelReader().getColor(x, y);
-                if (canvasColor.getOpacity() > 0) {
-                    writer.setColor(x, y, canvasColor);
-                }
-            }
-        }
-
-        return combinedImage;
-    }
-
-    // Получение расширения файла
-    private String getFileExtension(File file) {
-        String name = file.getName();
-        int lastIndexOf = name.lastIndexOf(".");
-        if (lastIndexOf == -1) {
-            return "png";
-        }
-        return name.substring(lastIndexOf + 1);
-    }
-
-    // Метод для кнопки перехода на приветствующий экран
-    @FXML
-    private void goBack(ActionEvent event) {
-        handleUnsavedChanges(event, this::goHello);
-    }
-
-    private void goHello() {
-        try {
-            // Загрузка FXML файла для создания графического интерфейса
-            FXMLLoader loader = new FXMLLoader(getClass().
-                    getResource("/org/example/_pngnp/views/hello-view.fxml"));
-            Parent root = loader.load();
-            logger.info("Hello FXML file loaded successfully");
-
-            // Создание сцены с загруженным интерфейсом
-            Scene scene = new Scene(root, 1200, 800);
-            logger.info("Scene created");
-
-            // Настройка и отображение окна
-            primaryStage.setTitle("PNGNP");
-            primaryStage.setScene(scene);
-            primaryStage.setMinWidth(1200);
-            primaryStage.setMinHeight(800);
-
-            // Установка максимального размера окна
-            primaryStage.setMaximized(true);
-
-            // Применение настроек темы
-            HelloController controller = loader.getController();
-            controller.setPrimaryStage(primaryStage);
-
-            primaryStage.show();
-            logger.info("Hello scene displayed");
-        } catch (Exception e) {
-            logger.error("Error occurred during application startup", e);
-        }
     }
 
     // Метод для кнопки отмены действия

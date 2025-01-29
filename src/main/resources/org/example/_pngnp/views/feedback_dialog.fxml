@@ -17,18 +17,18 @@
     </padding>
 
     <!-- Элемент Label для отображения заголовка -->
-    <Label styleClass="title" text="Feedback" />
+    <Label styleClass="title" text="%feedback" />
 
     <!-- Поле ввода для адреса электронной почты пользователя -->
-    <Label styleClass="label_FFFFFF" text="Your Email:" />
+    <Label styleClass="label_FFFFFF" text="%your_email" />
     <TextField fx:id="emailField" />
 
     <!-- Текстовое поле для ввода обратной связи -->
-    <Label styleClass="label_FFFFFF" text="Your Feedback:" />
+    <Label styleClass="label_FFFFFF" text="%your_feedback" />
     <TextArea fx:id="feedbackTextArea" prefHeight="200" prefWidth="400" />
 
     <!-- Кнопки для отправки и отмены -->
-    <Button styleClass="button" text="Send" onAction="#onSendButtonClick" />
-    <Button styleClass="button" text="Cancel" onAction="#onCancelButtonClick" />
+    <Button styleClass="button" text="%send" onAction="#onSendButtonClick" />
+    <Button styleClass="button" text="%cancel" onAction="#onCancelButtonClick" />
 
 </VBox>

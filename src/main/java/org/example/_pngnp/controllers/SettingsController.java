@@ -8,14 +8,11 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
-
-// Импорт классов для логирования
 import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-// Импорт классов для работы с настройками
 import org.example._pngnp.classes.Settings;
+
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
@@ -36,13 +33,13 @@ public class SettingsController {
     @FXML
     private ComboBox<String> themeComboBox;
 
-    // Метод для установки сцены диалога и темы
-    public void setDialogStage(Stage dialogStage) {
+    // Метод для установки значений
+    public void setProperties(Stage dialogStage) {
         this.dialogStage = dialogStage;
-        logger.info("Dialog stage set");
 
         // Установка темы
         setTheme();
+        logger.info("Properties set");
     }
 
     // Метод для установки темы
@@ -63,50 +60,6 @@ public class SettingsController {
         } catch (IOException e) {
             logger.error("Error occurred during setting theme", e);
         }
-    }
-
-    // Метод для кнопки сохранить
-    @FXML
-    private void onSaveButtonClick() {
-        // Сохранение настроек
-        saveSettings();
-    }
-
-    // Метод сохранения настроек
-    private void saveSettings() {
-        logger.info("Save button clicked");
-        // Получение параметров
-        String language = languageComboBox.getValue();
-        String theme = themeComboBox.getValue();
-
-        // Создание объекта настроек
-        Settings settings = new Settings();
-        settings.setLanguage(language);
-        // Определение темы
-        if (theme.equalsIgnoreCase("dark")) {
-            settings.setThemePath("/org/example/_pngnp/styles/dark-theme.css");
-        } else {
-            settings.setThemePath("/org/example/_pngnp/styles/light-theme.css");
-        }
-
-        // Сохранение настроек в файл
-        try {
-            Settings.saveSettings(settings, "settings.json");
-            logger.info("Settings saved");
-            unsavedChanges = false;
-            // Закрытие диалогового окна
-            dialogStage.close();
-        } catch (IOException e) {
-            logger.error("Error saving settings: ", e);
-        }
-    }
-
-    // Метод для кнопки отмены
-    @FXML
-    private void onCancelButtonClick() {
-        logger.info("Cancel button clicked");
-        // Закрытие диалогового окна без сохранения настроек
-        dialogStage.close();
     }
 
     public void initialize() {
@@ -179,5 +132,49 @@ public class SettingsController {
             // Если нет несохраненных изменений, просто закрываем диалоговое окно
             dialogStage.close();
         }
+    }
+
+    // Метод для кнопки сохранить
+    @FXML
+    private void onSaveButtonClick() {
+        // Сохранение настроек
+        saveSettings();
+    }
+
+    // Метод сохранения настроек
+    private void saveSettings() {
+        logger.info("Save button clicked");
+        // Получение параметров
+        String language = languageComboBox.getValue();
+        String theme = themeComboBox.getValue();
+
+        // Создание объекта настроек
+        Settings settings = new Settings();
+        settings.setLanguage(language);
+        // Определение темы
+        if (theme.equalsIgnoreCase("dark")) {
+            settings.setThemePath("/org/example/_pngnp/styles/dark-theme.css");
+        } else {
+            settings.setThemePath("/org/example/_pngnp/styles/light-theme.css");
+        }
+
+        // Сохранение настроек в файл
+        try {
+            Settings.saveSettings(settings, "settings.json");
+            logger.info("Settings saved");
+            unsavedChanges = false;
+            // Закрытие диалогового окна
+            dialogStage.close();
+        } catch (IOException e) {
+            logger.error("Error saving settings: ", e);
+        }
+    }
+
+    // Метод для кнопки отмены
+    @FXML
+    private void onCancelButtonClick() {
+        logger.info("Cancel button clicked");
+        // Закрытие диалогового окна без сохранения настроек
+        dialogStage.close();
     }
 }

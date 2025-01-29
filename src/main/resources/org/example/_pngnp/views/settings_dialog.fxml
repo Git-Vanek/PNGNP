@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Импорт необходимых классов из библиотеки JavaFX -->
-
-<!-- Основной контейнер VBox с применением стилей и контроллера -->
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.*?>
+
 <VBox styleClass="vbox" xmlns:fx="http://javafx.com/fxml" fx:controller="org.example._pngnp.controllers.SettingsController">
 
     <!-- Установка отступов для контейнера -->
@@ -19,7 +18,7 @@
     <Label styleClass="title" text="Settings" />
 
     <!-- Поле выбора для локализации -->
-    <Label styleClass="label_FFFFFF" text="Language:" />
+    <Label styleClass="label_FFFFFF" text="%language" />
     <ComboBox fx:id="languageComboBox" value="English">
         <items>
             <FXCollections fx:factory="observableArrayList">
@@ -30,7 +29,7 @@
     </ComboBox>
 
     <!-- Поле выбора для темы приложения -->
-    <Label styleClass="label_FFFFFF" text="Theme:" />
+    <Label styleClass="label_FFFFFF" text="%theme" />
     <ComboBox fx:id="themeComboBox">
         <items>
             <FXCollections fx:factory="observableArrayList">
@@ -41,7 +40,7 @@
     </ComboBox>
 
     <!-- Кнопки для сохранения и отмены -->
-    <Button styleClass="button" text="Save" onAction="#onSaveButtonClick" />
-    <Button styleClass="button" text="Cancel" onAction="#onCancelButtonClick" />
+    <Button styleClass="button" text="%save" onAction="#onSaveButtonClick" />
+    <Button styleClass="button" text="%cancel" onAction="#onCancelButtonClick" />
 
 </VBox>
