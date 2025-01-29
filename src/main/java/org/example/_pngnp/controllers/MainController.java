@@ -217,13 +217,13 @@ public class MainController {
                             }
                             zoomLevel = newZoomLevel;
                             updateZoom();
-                            logger.info("ZoomTextField - Zoom level changed to: " + zoomLevel);
+                            logger.info("ZoomTextField - Zoom level changed to: {}", zoomLevel);
                         } else {
                             logger.info("ZoomTextField - Image was not uploaded");
                         }
                     }
                 } catch (NumberFormatException e) {
-                    logger.warn("ZoomTextField - Invalid zoom level input: " + newValue);
+                    logger.warn("ZoomTextField - Invalid zoom level input: {}", newValue);
                 }
             });
         }
@@ -334,24 +334,24 @@ public class MainController {
         imageView.setFitWidth(30);
         imageView.setFitHeight(30);
         button.setGraphic(imageView);
-        logger.info("Button image set for: " + button.getId());
+        logger.info("Button image set for: {}", button.getId());
     }
 
-    // Обрабочик нажатия мыши на ScrollPane
+    // Обработчик нажатия мыши на ScrollPane
     private void scrollPaneEventMousePressed(MouseEvent event) {
         if (currentMode.equals("DRAG")) {
             startDragging(event);
         }
     }
 
-    // Обрабочик задержания мыши на ScrollPane
+    // Обработчик задержания мыши на ScrollPane
     private void scrollPaneEventMouseDragged(MouseEvent event) {
         if (currentMode.equals("DRAG")) {
             continueDragging(event);
         }
     }
 
-    // Обрабочик окончания задержания мыши на ScrollPane
+    // Обработчик окончания задержания мыши на ScrollPane
     private void scrollPaneEventMouseReleased(MouseEvent event) {
         if (currentMode.equals("DRAG")) {
             stopDragging();
@@ -377,7 +377,7 @@ public class MainController {
         }
     }
 
-    // Метод для завершения перемешения
+    // Метод для завершения перемещения
     private void stopDragging() {
         dragging = false;
     }
@@ -615,7 +615,7 @@ public class MainController {
             canvas.setWidth(imageView.getImage().getWidth());
             canvas.setHeight(imageView.getImage().getHeight());
             updateZoom();
-            logger.info("Image loaded from: " + originalPath);
+            logger.info("Image loaded from: {}", originalPath);
         } else {
             logger.warn("No image file selected");
             showNotification("Warning", "No image file selected");
@@ -642,7 +642,7 @@ public class MainController {
                     BufferedImage bufferedImage = SwingFXUtils.fromFXImage(combinedImage, null);
                     String format = getFileExtension(file);
                     ImageIO.write(bufferedImage, format, file);
-                    logger.info("Image saved to: " + file.getAbsolutePath());
+                    logger.info("Image saved to: {}", file.getAbsolutePath());
                     unsavedChanges = false;
                     showNotification("Success", "Image saved successfully to: " + file.getAbsolutePath());
                 } else {
@@ -754,7 +754,7 @@ public class MainController {
                 logger.info("ButtonIncreaseZoom - Zoom level is too big");
             } else {
                 updateZoom();
-                logger.info("ButtonIncreaseZoom - Zoom level increased to: " + zoomLevel);
+                logger.info("ButtonIncreaseZoom - Zoom level increased to: {}", zoomLevel);
             }
         } else {
             logger.info("ButtonIncreaseZoom - Image was not uploaded");
@@ -771,7 +771,7 @@ public class MainController {
                 logger.info("ButtonDecreaseZoom - Zoom level is too small");
             } else {
                 updateZoom();
-                logger.info("ButtonDecreaseZoom - Zoom level decreased to: " + zoomLevel);
+                logger.info("ButtonDecreaseZoom - Zoom level decreased to: {}", zoomLevel);
             }
         } else {
             logger.info("ButtonDecreaseZoom - Image was not uploaded");
@@ -813,7 +813,7 @@ public class MainController {
 
         // Обновление размеров ScrollPane
         updateScrollPane();
-        logger.info("Zoom level updated to: " + zoomLevel);
+        logger.info("Zoom level updated to: {}", zoomLevel);
     }
 
     // Метод обновления размеров ScrollPane

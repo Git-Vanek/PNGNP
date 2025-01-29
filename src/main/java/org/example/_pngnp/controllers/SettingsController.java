@@ -91,14 +91,10 @@ public class SettingsController {
         }
 
         // Слушатель изменений языка
-        languageComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            unsavedChanges = true;
-        });
+        languageComboBox.valueProperty().addListener((observable, oldValue, newValue) -> unsavedChanges = true);
 
         // Слушатель изменений темы
-        themeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            unsavedChanges = true;
-        });
+        themeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> unsavedChanges = true);
 
         // Установка обработчика закрытия диалогового окна
         if (dialogStage != null) {
