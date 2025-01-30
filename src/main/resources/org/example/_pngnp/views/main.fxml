@@ -85,8 +85,14 @@
                 <!-- Настройки режима текста -->
                 <VBox styleClass="settings-vbox" fx:id="settings_text_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%text" />
+                    <Label styleClass="label_FFFFFF" text="%entry_point" />
+                    <TextField fx:id="textX" promptText="%x" />
+                    <TextField fx:id="textY" promptText="%y" />
+                    <Label styleClass="label_FFFFFF" text="%enter_text" />
                     <TextField fx:id="textInput" promptText="%enter_text" />
+                    <Label styleClass="label_FFFFFF" text="%color" />
                     <ColorPicker fx:id="textColorPicker" />
+                    <Label styleClass="label_FFFFFF" text="%line_width" />
                     <Slider fx:id="textSizeSlider" min="10" max="50" value="20"
                             showTickMarks="true" showTickLabels="true" />
                     <Button styleClass="button" text="%add_text" onAction="#addText" />
@@ -135,6 +141,9 @@
                 <TextField fx:id="zoomTextField" prefWidth="50" alignment="CENTER_RIGHT" text="100%" />
                 <Button styleClass="button" text="%increase_zoom" onAction="#increaseZoom" />
                 <Button styleClass="button" text="%decrease_zoom" onAction="#decreaseZoom" />
+                <Label prefWidth="100"/>
+                <Label styleClass="label_FFFFFF" text="%coordinates" />
+                <Label fx:id="coordinates" styleClass="label_FFFFFF" text="0, 0" prefWidth="100" />
             </HBox>
         </HBox>
     </bottom>

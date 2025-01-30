@@ -165,6 +165,12 @@ public class MainController {
     private TextField cropHeight;
 
     @FXML
+    private TextField textX;
+
+    @FXML
+    private TextField textY;
+
+    @FXML
     private TextField textInput;
 
     @FXML
@@ -187,6 +193,9 @@ public class MainController {
 
     @FXML
     private Slider contrastSlider;
+
+    @FXML
+    private Label coordinates;
 
     // Метод установки модели изображения
     public void setModel(ImageModel model) {
@@ -294,6 +303,9 @@ public class MainController {
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::canvasEventMousePressed);
         canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::canvasEventMouseDragged);
         canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::canvasEventMouseReleased);
+
+        // Установка обработчика мыши для обновления координат
+        canvas.addEventHandler(MouseEvent.MOUSE_MOVED, this::canvasEventMouseMoved);
 
         // Инициализация других компонентов и обработчиков событий
         textColorPicker.setOnAction(event -> gc.setFill(textColorPicker.getValue()));
@@ -414,13 +426,42 @@ public class MainController {
     private void canvasEventMousePressed(MouseEvent event) {
         if (currentMode.equals("DRAW")) {
             startDrawing(event);
+        } else {
+            defaultPressed(event);
         }
+    }
+
+    // Метод для начала рисования
+    private void startDrawing(MouseEvent event) {
+        drawing = true;
+        defaultPressed(event);
+    }
+
+    // Метод получения начальных координат
+    private void defaultPressed(MouseEvent event) {
+        lastX = event.getX() / zoomLevel;
+        lastY = event.getY() / zoomLevel;
     }
 
     // Обработчик задержания мыши на Canvas
     private void canvasEventMouseDragged(MouseEvent event) {
         if (currentMode.equals("DRAW")) {
             continueDrawing(event);
+        }
+    }
+
+    // Метод для продолжения рисования
+    private void continueDrawing(MouseEvent event) {
+        if (drawing) {
+            double currentX = event.getX() / zoomLevel;
+            double currentY = event.getY() / zoomLevel;
+            gc.strokeLine(lastX, lastY, currentX, currentY);
+            // Установка флага несохраненных изменений
+            unsavedChanges = true;
+            lastX = currentX;
+            lastY = currentY;
+            // Обновление координат
+            coordinates.setText(lastX + ", " + lastY);
         }
     }
 
@@ -431,29 +472,18 @@ public class MainController {
         }
     }
 
-    // Метод для начала рисования
-    private void startDrawing(MouseEvent event) {
-        drawing = true;
-        lastX = event.getX() / zoomLevel;
-        lastY = event.getY() / zoomLevel;
-    }
-
-    // Метод для продолжения рисования
-    private void continueDrawing(MouseEvent event) {
-        if (drawing) {
-            double currentX = event.getX() / zoomLevel;
-            double currentY = event.getY() / zoomLevel;
-            gc.strokeLine(lastX, lastY, currentX, currentY);
-            lastX = currentX;
-            lastY = currentY;
-            // Установка флага несохраненных изменений
-            unsavedChanges = true;
-        }
-    }
-
     // Метод для завершения рисования
     private void stopDrawing() {
         drawing = false;
+    }
+
+    // Метод для обновления координат
+    private void canvasEventMouseMoved(MouseEvent event) {
+        double currentX = event.getX() / zoomLevel;
+        double currentY = event.getY() / zoomLevel;
+        lastX = currentX;
+        lastY = currentY;
+        coordinates.setText(lastX + ", " + lastY);
     }
 
     // Метод для кнопки загрузка изображения
@@ -701,13 +731,42 @@ public class MainController {
     // Метод для кнопки добавления текста
     @FXML
     private void addText() {
-        String text = textInput.getText();
-        Color color = textColorPicker.getValue();
-        double size = textSizeSlider.getValue();
+        // Проверка на заполненные поля
+        if (textX.getText().isEmpty() || textY.getText().isEmpty() ||
+                textInput.getText().isEmpty()) {
+            // Вывод уведомления об ошибке, если поля не заполнены
+            showNotification("Error", "All fields must be filled");
+            return;
+        }
 
-        gc.setFill(color);
-        gc.setFont(new Font(size));
-        gc.fillText(text, lastX, lastY);
+        // Получение параметров для обрезания
+        double x, y;
+        try {
+            x = Double.parseDouble(textX.getText());
+            y = Double.parseDouble(textY.getText());
+        } catch (NumberFormatException e) {
+            // Вывод уведомления об ошибке, если введены некорректные значения
+            showNotification("Error", "Invalid input. Please enter numeric values.");
+            return;
+        }
+
+        // Проверка параметров для обрезания
+        if (x < 0 || y < 0 ||
+                x > (int) imageView.getImage().getWidth() ||
+                y > (int) imageView.getImage().getHeight()) {
+            // Вывод уведомления об ошибке в параметрах обрезания
+            showNotification("Error", "Entry point does not have to go beyond the area of the image");
+        } else {
+            // Получение других параметров
+            String text = textInput.getText();
+            Color color = textColorPicker.getValue();
+            double size = textSizeSlider.getValue();
+
+            // Вставка текста
+            gc.setFill(color);
+            gc.setFont(new Font(size));
+            gc.fillText(text, x, y);
+        }
     }
 
     // Метод для кнопки переключения на режим работы со стикерами
