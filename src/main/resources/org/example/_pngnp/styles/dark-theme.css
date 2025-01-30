@@ -105,8 +105,6 @@
 /* Стили для контейнера center */
 .scroll-pane {
     -fx-background-color: #181F31;
-    -fx-border-color: #2D3446;
-    -fx-border-width: 1px;
     -fx-padding: 10px;
 }
 .stack-pane {
@@ -123,6 +121,8 @@
 
 /* Стили для контейнера настроек left */
 .left-stack-pane {
+    -fx-border-color: #2D3446;
+    -fx-border-width: 1px;
     -fx-padding: 10px;
     -fx-spacing: 10.0;
 }

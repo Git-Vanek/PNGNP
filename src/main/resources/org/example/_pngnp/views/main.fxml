@@ -39,7 +39,7 @@
 
     <!-- Выдвижная панель слева с инструментами -->
     <left>
-        <HBox styleClass="left-hbox">
+        <HBox fx:id="leftBox" styleClass="left-hbox" visible="false">
             <!-- Панель с кнопками для различных инструментов -->
             <VBox styleClass="left-vbox">
                 <!-- Кнопки для различных инструментов -->

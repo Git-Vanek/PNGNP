@@ -16,6 +16,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -79,6 +80,9 @@ public class MainController {
     private boolean unsavedChanges = false;
 
     // Аннотации FXML для связывания с элементами интерфейса
+    @FXML
+    private HBox leftBox;
+
     @FXML
     private Button button_toggle_mode;
 
@@ -465,6 +469,7 @@ public class MainController {
             String originalPath = file.getAbsolutePath();
             model.loadImage(originalPath);
             imageView.setImage(model.getImage());
+            leftBox.setVisible(true);
             // Очистка содержимого canvas
             canvasClear();
             canvas.setWidth(imageView.getImage().getWidth());
@@ -895,7 +900,7 @@ public class MainController {
             // Добавление обновленных элементов в StackPane
             stackPane.getChildren().addAll(imageView, canvas);
             // Установка стилей для StackPane
-            stackPane.setStyle("-fx-background-color: #181F31;");
+            stackPane.getStyleClass().add("stack-pane");
             // Установка нового содержимого в ScrollPane
             scrollPane.setContent(stackPane);
             scrollPane.setFitToWidth(true);
