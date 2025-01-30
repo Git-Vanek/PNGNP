@@ -100,7 +100,12 @@
                 <!-- Настройки режима стикеров -->
                 <VBox styleClass="settings-vbox" fx:id="settings_stickers_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%stickers" />
-                    <ComboBox fx:id="stickerComboBox" onAction="#selectSticker" />
+                    <Label styleClass="label_FFFFFF" text="%entry_point" />
+                    <TextField fx:id="stickerX" promptText="%x" />
+                    <TextField fx:id="stickerY" promptText="%y" />
+                    <Label styleClass="label_FFFFFF" text="%selection" />
+                    <ComboBox fx:id="stickerComboBox" />
+                    <Button styleClass="button" text="%add_stickers" onAction="#add_stickers" />
                 </VBox>
                 <!-- Настройки режима фильтров -->
                 <VBox styleClass="settings-vbox" fx:id="settings_filters_mode" visible="false">

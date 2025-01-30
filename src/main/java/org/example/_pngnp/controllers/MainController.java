@@ -165,6 +165,12 @@ public class MainController {
     private TextField cropHeight;
 
     @FXML
+    private TextField stickerX;
+
+    @FXML
+    private TextField stickerY;
+
+    @FXML
     private TextField textX;
 
     @FXML
@@ -312,7 +318,7 @@ public class MainController {
         textSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setFont(new Font(newValue.doubleValue())));
 
         // Добавление стикеров в ComboBox
-        stickerComboBox.getItems().addAll("sticker1", "sticker2", "sticker3");
+        stickerComboBox.getItems().addAll("raiden", "sonic", "vergil");
 
         // Добавление фильтров в ComboBox
         filterComboBox.getItems().addAll("Grayscale", "Sepia", "Invert");
@@ -739,7 +745,7 @@ public class MainController {
             return;
         }
 
-        // Получение параметров для обрезания
+        // Получение параметров для вставки текста
         double x, y;
         try {
             x = Double.parseDouble(textX.getText());
@@ -750,7 +756,7 @@ public class MainController {
             return;
         }
 
-        // Проверка параметров для обрезания
+        // Проверка параметров для вставки текста
         if (x < 0 || y < 0 ||
                 x > (int) imageView.getImage().getWidth() ||
                 y > (int) imageView.getImage().getHeight()) {
@@ -777,13 +783,43 @@ public class MainController {
         selectButton(button_stickers_mode, settings_stickers_mode);
     }
 
-    //
+    // Метод для кнопки добавления стикера
     @FXML
-    private void selectSticker() {
-        String selectedSticker = stickerComboBox.getValue();
-        Image stickerImage = new Image(Objects.requireNonNull(getClass().
-                getResourceAsStream("/stickers/" + selectedSticker + ".png")));
-        gc.drawImage(stickerImage, lastX, lastY);
+    private void add_stickers() {
+        // Проверка на заполненные поля
+        if (stickerX.getText().isEmpty() || stickerY.getText().isEmpty() ||
+                stickerComboBox.getValue() == null) {
+            // Вывод уведомления об ошибке, если поля не заполнены
+            showNotification("Error", "All fields must be filled");
+            return;
+        }
+
+        // Получение параметров для добавления стикеров
+        double x, y;
+        try {
+            x = Double.parseDouble(stickerX.getText());
+            y = Double.parseDouble(stickerY.getText());
+        } catch (NumberFormatException e) {
+            // Вывод уведомления об ошибке, если введены некорректные значения
+            showNotification("Error", "Invalid input. Please enter numeric values.");
+            return;
+        }
+
+        // Проверка параметров для добавления стикеров
+        if (x < 0 || y < 0 ||
+                x > (int) imageView.getImage().getWidth() ||
+                y > (int) imageView.getImage().getHeight()) {
+            // Вывод уведомления об ошибке в параметрах обрезания
+            showNotification("Error", "Entry point does not have to go beyond the area of the image");
+        } else {
+            // Получение стикера
+            String selectedSticker = stickerComboBox.getValue();
+            Image stickerImage = new Image(Objects.requireNonNull(getClass().
+                    getResourceAsStream("/org/example/_pngnp/stickers/" + selectedSticker + ".png")));
+
+            // Вставка стикера
+            gc.drawImage(stickerImage, x, y);
+        }
     }
 
 
