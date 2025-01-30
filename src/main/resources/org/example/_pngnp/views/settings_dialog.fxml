@@ -7,7 +7,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import java.lang.*?>
 
-<VBox styleClass="vbox" xmlns:fx="http://javafx.com/fxml" fx:controller="org.example._pngnp.controllers.SettingsController">
+<VBox styleClass="vbox" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.example._pngnp.controllers.SettingsController">
 
     <!-- Установка отступов для контейнера -->
     <padding>

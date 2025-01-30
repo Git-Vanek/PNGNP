@@ -80,7 +80,7 @@ public class HelloController {
         }
     }
 
-    // Метод инициализации контроллера
+    // Инициализация компонентов и обработчиков событий
     @FXML
     public void initialize() {
         logger.info("Initializing HelloController");
@@ -89,7 +89,8 @@ public class HelloController {
             updateLocalization();
 
             // Загрузка логотипа из папки resources
-            Image logoImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/org/example/_pngnp/images/logo.png")));
+            Image logoImage = new Image(Objects.requireNonNull(getClass().
+                    getResourceAsStream("/org/example/_pngnp/images/logo.png")));
             logger.info("Logo image loaded successfully");
 
             // Установка логотипа в ImageView

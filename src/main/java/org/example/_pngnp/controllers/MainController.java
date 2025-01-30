@@ -193,7 +193,6 @@ public class MainController {
     // Метод установки основного окна приложения, обработчика закрытия и темы
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        logger.info("Primary stage set");
 
         // Установка темы
         setTheme();
@@ -201,6 +200,7 @@ public class MainController {
         // Установка обработчика закрытия окна
         primaryStage.setOnCloseRequest(windowEvent ->
                 handleUnsavedChanges(windowEvent, primaryStage::close));
+        logger.info("Properties set");
     }
 
     // Метод для установки темы

@@ -2,13 +2,15 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
+
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example._pngnp.classes.Settings;
@@ -23,8 +25,6 @@ public class SettingsController {
     private static final Logger logger = LogManager.getLogger(SettingsController.class);
 
     private Stage dialogStage;
-
-    // Переменная для отслеживания наличия несохраненных изменений
     private boolean unsavedChanges = false;
 
     @FXML
@@ -39,6 +39,10 @@ public class SettingsController {
 
         // Установка темы
         setTheme();
+
+        // Установка обработчика закрытия диалогового окна
+        dialogStage.setOnCloseRequest(windowEvent ->
+                handleUnsavedChanges(windowEvent, dialogStage::close));
         logger.info("Properties set");
     }
 
@@ -62,6 +66,7 @@ public class SettingsController {
         }
     }
 
+    // Инициализация компонентов и обработчиков событий
     public void initialize() {
         logger.info("Initializing SettingsController");
 
@@ -80,18 +85,15 @@ public class SettingsController {
         }
 
         // Слушатель изменений языка
-        languageComboBox.valueProperty().addListener((observable, oldValue, newValue) -> unsavedChanges = true);
+        languageComboBox.valueProperty().addListener((observable,
+                                                      oldValue, newValue) -> unsavedChanges = true);
 
         // Слушатель изменений темы
-        themeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> unsavedChanges = true);
-
-        // Установка обработчика закрытия диалогового окна
-        if (dialogStage != null) {
-            dialogStage.setOnCloseRequest(this::handleCloseRequest);
-        }
+        themeComboBox.valueProperty().addListener((observable,
+                                                   oldValue, newValue) -> unsavedChanges = true);
     }
 
-    private void handleCloseRequest(WindowEvent windowEvent) {
+    private void handleUnsavedChanges(Event event, Runnable onNoUnsavedChanges) {
         if (unsavedChanges) {
             logger.info("Displaying unsaved changes alert");
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -113,24 +115,24 @@ public class SettingsController {
                     saveSettings();
                     if (!unsavedChanges) {
                         // Закрытие диалогового окна
-                        dialogStage.close();
+                        onNoUnsavedChanges.run();
                     } else {
                         // Отмена закрытия диалогового окна
-                        windowEvent.consume();
+                        event.consume();
                     }
                 } else if (result.get() == dontSaveButton) {
                     logger.info("User chose not to save the changes");
                     // Закрытие диалогового окна
-                    dialogStage.close();
+                    onNoUnsavedChanges.run();
                 } else {
                     logger.info("User chose to cancel");
                     // Отмена закрытия диалогового окна
-                    windowEvent.consume();
+                    event.consume();
                 }
             }
         } else {
             // Если нет несохраненных изменений, просто закрываем диалоговое окно
-            dialogStage.close();
+            onNoUnsavedChanges.run();
         }
     }
 
@@ -172,9 +174,8 @@ public class SettingsController {
 
     // Метод для кнопки отмены
     @FXML
-    private void onCancelButtonClick() {
+    private void onCancelButtonClick(ActionEvent event) {
         logger.info("Cancel button clicked");
-        // Закрытие диалогового окна без сохранения настроек
-        dialogStage.close();
+        handleUnsavedChanges(event, dialogStage::close);
     }
 }

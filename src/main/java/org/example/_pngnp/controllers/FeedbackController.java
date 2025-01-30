@@ -2,8 +2,12 @@
 package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -17,6 +21,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
@@ -28,6 +33,7 @@ public class FeedbackController {
 
     private Stage dialogStage;
     private ResourceBundle resources;
+    private boolean unsavedChanges = false;
 
     @FXML
     private TextField emailField;
@@ -42,6 +48,10 @@ public class FeedbackController {
 
         // Установка темы
         setTheme();
+
+        // Установка обработчика закрытия диалогового окна
+        dialogStage.setOnCloseRequest(windowEvent ->
+                handleUnsavedChanges(windowEvent, dialogStage::close));
         logger.info("Properties set");
     }
 
@@ -62,6 +72,62 @@ public class FeedbackController {
             }
         } catch (IOException e) {
             logger.error("Error occurred during setting theme", e);
+        }
+    }
+
+    // Инициализация компонентов и обработчиков событий
+    public void initialize() {
+        logger.info("Initializing FeedbackController");
+
+        // Добавляем слушатели на изменение почты
+        emailField.textProperty().addListener((observable,
+                                               oldValue, newValue) -> unsavedChanges = true);
+
+        // Добавляем слушатели на изменение письма
+        feedbackTextArea.textProperty().addListener((observable,
+                                                     oldValue, newValue) -> unsavedChanges = true);
+    }
+
+    private void handleUnsavedChanges(Event event, Runnable onNoUnsavedChanges) {
+        if (unsavedChanges) {
+            logger.info("Displaying unsaved changes alert");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Unsaved Changes");
+            alert.setHeaderText("You have unsaved changes in the settings.");
+            alert.setContentText("Do you want to save the changes?");
+
+            ButtonType saveButton = new ButtonType("Save");
+            ButtonType dontSaveButton = new ButtonType("Don't Save");
+            ButtonType cancelButton = new ButtonType("Cancel");
+
+            alert.getButtonTypes().setAll(saveButton, dontSaveButton, cancelButton);
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent()) {
+                if (result.get() == saveButton) {
+                    logger.info("User chose to save the changes");
+                    // Сохранение изменений
+                    onSendButtonClick();
+                    if (!unsavedChanges) {
+                        // Закрытие диалогового окна
+                        onNoUnsavedChanges.run();
+                    } else {
+                        // Отмена закрытия диалогового окна
+                        event.consume();
+                    }
+                } else if (result.get() == dontSaveButton) {
+                    logger.info("User chose not to save the changes");
+                    // Закрытие диалогового окна
+                    onNoUnsavedChanges.run();
+                } else {
+                    logger.info("User chose to cancel");
+                    // Отмена закрытия диалогового окна
+                    event.consume();
+                }
+            }
+        } else {
+            // Если нет несохраненных изменений, просто закрываем диалоговое окно
+            onNoUnsavedChanges.run();
         }
     }
 
@@ -145,8 +211,8 @@ public class FeedbackController {
 
     // Метод для кнопки отмены
     @FXML
-    private void onCancelButtonClick() {
+    private void onCancelButtonClick(ActionEvent event) {
         // Закрытие диалогового окна без отправки обратной связи
-        dialogStage.close();
+        handleUnsavedChanges(event, dialogStage::close);
     }
 }
