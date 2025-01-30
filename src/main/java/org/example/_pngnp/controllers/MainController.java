@@ -759,10 +759,8 @@ public class MainController {
         double brightness = brightnessSlider.getValue();
         double contrast = contrastSlider.getValue();
 
-        Image adjustedImage = model.adjustBrightnessAndContrast(imageView.getImage(), brightness, contrast);
+        Image adjustedImage = model.adjustBrightnessAndContrast(model.getImage(), brightness, contrast);
         imageView.setImage(adjustedImage);
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.drawImage(adjustedImage, 0, 0);
     }
 
     // Метод для кнопки отмены действия
@@ -823,8 +821,8 @@ public class MainController {
     private void decreaseZoom() {
         if (imageView.getImage() != null) {
             zoomLevel -= 0.1;
-            if (zoomLevel < 0.1) {
-                zoomLevel = 0.1;
+            if (zoomLevel < 1) {
+                zoomLevel = 1;
                 logger.info("ButtonDecreaseZoom - Zoom level is too small");
             } else {
                 updateZoom();

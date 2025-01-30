@@ -50,7 +50,8 @@
                 <Button styleClass="button" fx:id="button_stickers_mode" onAction="#stickersMode" />
                 <Button styleClass="button" fx:id="button_filters_mode" onAction="#filtersMode" />
                 <Button styleClass="button" fx:id="button_layers_mode" onAction="#layersMode" />
-                <Button styleClass="button" fx:id="button_brightness_and_contrast_mode" onAction="#brightnessAndContrastMode" />
+                <Button styleClass="button" fx:id="button_brightness_and_contrast_mode"
+                        onAction="#brightnessAndContrastMode" />
             </VBox>
             <!-- Панель с настройками выбранного режима редактирования -->
             <!-- VBox для каждого режима редактирования -->
@@ -59,7 +60,8 @@
                 <VBox styleClass="settings-vbox" fx:id="settings_toggle_mode">
                     <Label styleClass="label_FFFFFF" text="%toggle" />
                     <Label styleClass="label_FFFFFF" text="%speed" />
-                    <Slider fx:id="speedSlider" min="0.1" max="2.0" value="1.0" showTickMarks="true" showTickLabels="true" />
+                    <Slider fx:id="speedSlider" min="0.1" max="2.0" value="1.0"
+                            showTickMarks="true" showTickLabels="true" />
                 </VBox>
                 <!-- Настройки режима рисования -->
                 <VBox styleClass="settings-vbox" fx:id="settings_draw_mode" visible="false">
@@ -67,7 +69,8 @@
                     <Label styleClass="label_FFFFFF" text="%color" />
                     <ColorPicker fx:id="colorPicker" />
                     <Label styleClass="label_FFFFFF" text="%line_width" />
-                    <Slider fx:id="lineWidthSlider" min="1" max="10" value="2" showTickMarks="true" showTickLabels="true" />
+                    <Slider fx:id="lineWidthSlider" min="1" max="10" value="2"
+                            showTickMarks="true" showTickLabels="true" />
                 </VBox>
                 <!-- Настройки режима обрезания -->
                 <VBox styleClass="settings-vbox" fx:id="settings_crop_mode" visible="false">
@@ -84,7 +87,8 @@
                     <Label styleClass="label_FFFFFF" text="%text" />
                     <TextField fx:id="textInput" promptText="%enter_text" />
                     <ColorPicker fx:id="textColorPicker" />
-                    <Slider fx:id="textSizeSlider" min="10" max="50" value="20" showTickMarks="true" showTickLabels="true" />
+                    <Slider fx:id="textSizeSlider" min="10" max="50" value="20"
+                            showTickMarks="true" showTickLabels="true" />
                     <Button styleClass="button" text="%add_text" onAction="#addText" />
                 </VBox>
                 <!-- Настройки режима стикеров -->
@@ -107,9 +111,11 @@
                 <!-- Настройки режима яркости и контраста -->
                 <VBox styleClass="settings-vbox" fx:id="settings_brightness_and_contrast_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%brightness" />
-                    <Slider fx:id="brightnessSlider" min="-100" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
+                    <Slider fx:id="brightnessSlider" min="-100" showTickMarks="true"
+                            showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
                     <Label styleClass="label_FFFFFF" text="%contrast" />
-                    <Slider fx:id="contrastSlider" min="-100" showTickMarks="true" showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
+                    <Slider fx:id="contrastSlider" min="-100" showTickMarks="true"
+                            showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
                 </VBox>
             </StackPane>
         </HBox>

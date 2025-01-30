@@ -7,20 +7,21 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
-
-// Импорт классов для работы с файлами
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
-// Импорт классов для логирования
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 // Объявление класса ImageModel
 public class ImageModel {
 
     // Приватное поле для хранения изображения
     private Image image;
+
+    // Приватное поле для хранения canvas
+    private Canvas canvas;
 
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(ImageModel.class);
@@ -30,10 +31,10 @@ public class ImageModel {
         try {
             // Загрузка изображения из файла
             image = new Image(new FileInputStream(filePath));
-            logger.info("Image loaded successfully from: " + filePath);
+            logger.info("Image loaded successfully from: {}", filePath);
         } catch (FileNotFoundException e) {
             // Обработка исключения, если файл не найден
-            logger.error("File not found: " + filePath, e);
+            logger.error("File not found: {}", filePath, e);
         }
     }
 
@@ -55,10 +56,42 @@ public class ImageModel {
         return image;
     }
 
+    // Метод применения яркости и контраста к изображению
     public Image adjustBrightnessAndContrast(Image image, double brightness, double contrast) {
-        // Применение яркости и контраста к изображению
-        // Здесь можно добавить логику для регулировки яркости и контраста
-        return image;
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        WritableImage adjustedImage = new WritableImage(width, height);
+        PixelReader pixelReader = image.getPixelReader();
+        PixelWriter pixelWriter = adjustedImage.getPixelWriter();
+
+        double factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int argb = pixelReader.getArgb(x, y);
+                int newArgb = getNewArgb(brightness, argb, factor);
+                pixelWriter.setArgb(x, y, newArgb);
+            }
+        }
+
+        return adjustedImage;
+    }
+
+    private static int getNewArgb(double brightness, int argb, double factor) {
+        int a = (argb >> 24) & 0xff;
+        int r = (argb >> 16) & 0xff;
+        int g = (argb >> 8) & 0xff;
+        int b = argb & 0xff;
+
+        r = (int) (factor * (r - 128) + 128 + brightness);
+        g = (int) (factor * (g - 128) + 128 + brightness);
+        b = (int) (factor * (b - 128) + 128 + brightness);
+
+        r = Math.max(0, Math.min(255, r));
+        g = Math.max(0, Math.min(255, g));
+        b = Math.max(0, Math.min(255, b));
+
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     // Приватный метод для применения фильтра к изображению
