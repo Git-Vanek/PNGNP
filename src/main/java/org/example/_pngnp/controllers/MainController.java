@@ -772,6 +772,7 @@ public class MainController {
             gc.setFill(color);
             gc.setFont(new Font(size));
             gc.fillText(text, x, y);
+            logger.info("Text has been added");
         }
     }
 
@@ -819,6 +820,7 @@ public class MainController {
 
             // Вставка стикера
             gc.drawImage(stickerImage, x, y);
+            logger.info("Sticker has been added");
         }
     }
 
@@ -831,14 +833,29 @@ public class MainController {
         selectButton(button_filters_mode, settings_filters_mode);
     }
 
-    //
+    // Метод для кнопки добавления фильтра
     @FXML
     private void applyFilter() {
+        // Проверка на заполненные поля
+        if (filterComboBox.getValue() == null) {
+            // Вывод уведомления об ошибке, если поля не заполнены
+            showNotification("Error", "All fields must be filled");
+            return;
+        }
+
+        // Применение фильтра
         String selectedFilter = filterComboBox.getValue();
-        Image filteredImage = model.applyFilter(imageView.getImage(), selectedFilter);
+        Image filteredImage = model.setFilter(model.getImage(), selectedFilter);
+
+        // Обновление изображения
         imageView.setImage(filteredImage);
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.drawImage(filteredImage, 0, 0);
+    }
+
+    // Метод для кнопки удаления фильтра
+    @FXML
+    private void deleteFilter() {
+        // Обновление изображения
+        imageView.setImage(model.getImage());
     }
 
     // Метод для кнопки переключения на режим работы со слоями
@@ -872,7 +889,10 @@ public class MainController {
         double brightness = brightnessSlider.getValue();
         double contrast = contrastSlider.getValue();
 
+        // Применение параметров
         Image adjustedImage = model.adjustBrightnessAndContrast(brightness, contrast);
+
+        // Обновление изображения
         imageView.setImage(adjustedImage);
     }
 

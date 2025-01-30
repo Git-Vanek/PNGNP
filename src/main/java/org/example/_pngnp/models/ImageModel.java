@@ -62,14 +62,31 @@ public class ImageModel {
     }
 
     // Метод для применения фильтра к изображению
-    public Image applyFilter(Image image, String selectedFilter) {
+    public Image setFilter(Image image, String selectedFilter) {
         logger.info("Applying filter to image");
         // Применение фильтра к изображению
-        this.image = applyFilter((x, y, color) -> {
-            // Логика фильтра
-
-            return color;
-        });
+        switch (selectedFilter) {
+            case "Grayscale":
+                image = applyFilter((x, y, color) -> {
+                    double gray = 0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue();
+                    return Color.gray(gray);
+                });
+                break;
+            case "Sepia":
+                image = applyFilter((x, y, color) -> {
+                    double r = 0.393 * color.getRed() + 0.769 * color.getGreen() + 0.189 * color.getBlue();
+                    double g = 0.349 * color.getRed() + 0.686 * color.getGreen() + 0.168 * color.getBlue();
+                    double b = 0.272 * color.getRed() + 0.534 * color.getGreen() + 0.131 * color.getBlue();
+                    return Color.color(Math.min(1, r), Math.min(1, g), Math.min(1, b));
+                });
+                break;
+            case "Invert":
+                image = applyFilter((x, y, color) -> Color.color(1 - color.getRed(), 1 - color.getGreen(), 1 - color.getBlue()));
+                break;
+            default:
+                logger.warn("Unknown filter: {}", selectedFilter);
+                break;
+        }
         return image;
     }
 
@@ -158,6 +175,8 @@ public class ImageModel {
             ImageModel clone = (ImageModel) super.clone();
             // Клонирование изображения
             clone.image = new Image(image.getUrl());
+            // Клонирование содержимого canvas
+            clone.canvas = new Canvas(canvas.getGraphicsConfiguration());
             logger.info("ImageModel cloned successfully");
             return clone;
         } catch (CloneNotSupportedException e) {

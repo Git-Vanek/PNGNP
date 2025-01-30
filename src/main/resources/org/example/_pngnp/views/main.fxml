@@ -110,7 +110,10 @@
                 <!-- Настройки режима фильтров -->
                 <VBox styleClass="settings-vbox" fx:id="settings_filters_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%filters" />
-                    <ComboBox fx:id="filterComboBox" onAction="#applyFilter" />
+                    <Label styleClass="label_FFFFFF" text="%selection" />
+                    <ComboBox fx:id="filterComboBox" />
+                    <Button styleClass="button" text="%applyFilter" onAction="#applyFilter" />
+                    <Button styleClass="button" text="%deleteFilter" onAction="#deleteFilter" />
                 </VBox>
                 <!-- Настройки режима слоев -->
                 <VBox styleClass="settings-vbox" fx:id="settings_layers_mode" visible="false">
