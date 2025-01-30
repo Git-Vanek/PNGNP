@@ -44,6 +44,23 @@ public class ImageModel {
         return image;
     }
 
+    // Применение обрезки к изображению
+    public void applyCrop(int x, int y, int width, int height) {
+        WritableImage croppedImage = new WritableImage(width, height);
+        PixelReader pixelReader = image.getPixelReader();
+        PixelWriter pixelWriter = croppedImage.getPixelWriter();
+
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                pixelWriter.setArgb(i, j, pixelReader.getArgb(x + i, y + j));
+            }
+        }
+
+        // Установка нового изображения в модели
+        logger.info("Image has been cropped");
+        image = croppedImage;
+    }
+
     // Метод для применения фильтра к изображению
     public Image applyFilter(Image image, String selectedFilter) {
         logger.info("Applying filter to image");
@@ -54,44 +71,6 @@ public class ImageModel {
             return color;
         });
         return image;
-    }
-
-    // Метод применения яркости и контраста к изображению
-    public Image adjustBrightnessAndContrast(Image image, double brightness, double contrast) {
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
-        WritableImage adjustedImage = new WritableImage(width, height);
-        PixelReader pixelReader = image.getPixelReader();
-        PixelWriter pixelWriter = adjustedImage.getPixelWriter();
-
-        double factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int argb = pixelReader.getArgb(x, y);
-                int newArgb = getNewArgb(brightness, argb, factor);
-                pixelWriter.setArgb(x, y, newArgb);
-            }
-        }
-
-        return adjustedImage;
-    }
-
-    private static int getNewArgb(double brightness, int argb, double factor) {
-        int a = (argb >> 24) & 0xff;
-        int r = (argb >> 16) & 0xff;
-        int g = (argb >> 8) & 0xff;
-        int b = argb & 0xff;
-
-        r = (int) (factor * (r - 128) + 128 + brightness);
-        g = (int) (factor * (g - 128) + 128 + brightness);
-        b = (int) (factor * (b - 128) + 128 + brightness);
-
-        r = Math.max(0, Math.min(255, r));
-        g = Math.max(0, Math.min(255, g));
-        b = Math.max(0, Math.min(255, b));
-
-        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     // Приватный метод для применения фильтра к изображению
@@ -131,6 +110,46 @@ public class ImageModel {
     interface FilterFunction {
         // Метод для применения фильтра к цвету пикселя
         Color apply(int x, int y, Color color);
+    }
+
+    // Метод применения яркости и контраста к изображению
+    public Image adjustBrightnessAndContrast(double brightness, double contrast) {
+        int width = (int) image.getWidth();
+        int height = (int) image.getHeight();
+        WritableImage adjustedImage = new WritableImage(width, height);
+        PixelReader pixelReader = image.getPixelReader();
+        PixelWriter pixelWriter = adjustedImage.getPixelWriter();
+
+        double factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int argb = pixelReader.getArgb(x, y);
+                int newArgb = getNewArgb(brightness, argb, factor);
+                pixelWriter.setArgb(x, y, newArgb);
+            }
+        }
+
+        // Возврат нового изображения с примененными яркостью и контрастом
+        logger.info("Brightness And Contrast applied successfully");
+        return adjustedImage;
+    }
+
+    private static int getNewArgb(double brightness, int argb, double factor) {
+        int a = (argb >> 24) & 0xff;
+        int r = (argb >> 16) & 0xff;
+        int g = (argb >> 8) & 0xff;
+        int b = argb & 0xff;
+
+        r = (int) (factor * (r - 128) + 128 + brightness);
+        g = (int) (factor * (g - 128) + 128 + brightness);
+        b = (int) (factor * (b - 128) + 128 + brightness);
+
+        r = Math.max(0, Math.min(255, r));
+        g = Math.max(0, Math.min(255, g));
+        b = Math.max(0, Math.min(255, b));
+
+        return (a << 24) | (r << 16) | (g << 8) | b;
     }
 
     @Override

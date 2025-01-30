@@ -649,27 +649,40 @@ public class MainController {
     // Метод для кнопки применения обрезания
     @FXML
     private void applyCrop() {
-        double x = Double.parseDouble(cropX.getText());
-        double y = Double.parseDouble(cropY.getText());
-        double width = Double.parseDouble(cropWidth.getText());
-        double height = Double.parseDouble(cropHeight.getText());
-
-        // Применение обрезки к изображению
-        WritableImage croppedImage = new WritableImage((int) width, (int) height);
-        PixelReader pixelReader = imageView.getImage().getPixelReader();
-        PixelWriter pixelWriter = croppedImage.getPixelWriter();
-
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                pixelWriter.setArgb( i, j, pixelReader.getArgb((int) (x + i), (int) (y + j)));
-            }
+        // Проверка на заполненные поля
+        if (cropX.getText().isEmpty() || cropY.getText().isEmpty() ||
+                cropWidth.getText().isEmpty() || cropHeight.getText().isEmpty()) {
+            // Вывод уведомления об ошибке, если поля не заполнены
+            showNotification("Error", "All fields must be filled");
+            return;
         }
 
-        imageView.setImage(croppedImage);
-        canvas.setWidth(width);
-        canvas.setHeight(height);
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        gc.drawImage(croppedImage, 0, 0);
+        // Получение параметров для обрезания
+        double x, y, width, height;
+        try {
+            x = Double.parseDouble(cropX.getText());
+            y = Double.parseDouble(cropY.getText());
+            width = Double.parseDouble(cropWidth.getText());
+            height = Double.parseDouble(cropHeight.getText());
+        } catch (NumberFormatException e) {
+            // Вывод уведомления об ошибке, если введены некорректные значения
+            showNotification("Error", "Invalid input. Please enter numeric values.");
+            return;
+        }
+
+        // Проверка параметров для обрезания
+        if (x < 0 || y < 0 || width <= 0 || height <= 0 ||
+                x + width > (int) imageView.getImage().getWidth() ||
+                y + height > (int) imageView.getImage().getHeight()) {
+            // Вывод уведомления об ошибке в параметрах обрезания
+            showNotification("Error", "Crop zone does not have to go beyond the area of the image");
+        } else {
+            // Применение обрезания
+            model.applyCrop((int) x, (int) y, (int) width, (int) height);
+            // Установка изображения и обновление масштабов
+            imageView.setImage(model.getImage());
+            updateZoom();
+        }
     }
 
     // Метод для кнопки переключения на режим работы с текстом
@@ -759,7 +772,7 @@ public class MainController {
         double brightness = brightnessSlider.getValue();
         double contrast = contrastSlider.getValue();
 
-        Image adjustedImage = model.adjustBrightnessAndContrast(model.getImage(), brightness, contrast);
+        Image adjustedImage = model.adjustBrightnessAndContrast(brightness, contrast);
         imageView.setImage(adjustedImage);
     }
 

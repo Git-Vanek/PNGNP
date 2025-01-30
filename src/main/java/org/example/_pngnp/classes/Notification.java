@@ -27,6 +27,7 @@ public class Notification {
 
         Label messageLabel = new Label(message);
         messageLabel.setStyle("-fx-font-size: 14px;");
+        messageLabel.setWrapText(true);
 
         VBox layout = new VBox(10, titleLabel, messageLabel);
         layout.setStyle("-fx-padding: 10px; -fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-width: 1px;");
