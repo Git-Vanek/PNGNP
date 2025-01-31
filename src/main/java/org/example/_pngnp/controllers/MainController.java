@@ -3,6 +3,8 @@ package org.example._pngnp.controllers;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с графическим интерфейсом
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -14,7 +16,9 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.image.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -26,6 +30,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example._pngnp.classes.Layer;
 import org.example._pngnp.classes.Notification;
 import org.example._pngnp.classes.Settings;
 import org.example._pngnp.models.ImageModel;
@@ -34,9 +39,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 // Основной контроллер для управления интерфейсом и логикой приложения
 public class MainController {
@@ -79,6 +82,10 @@ public class MainController {
     // Переменная для отслеживания наличия несохраненных изменений
     private boolean unsavedChanges = false;
 
+    // Списки слоев
+    private ObservableList<Layer> layers;
+    private List<Canvas> layerCanvases;
+
     // Аннотации FXML для связывания с элементами интерфейса
     @FXML
     private HBox leftBox;
@@ -114,7 +121,10 @@ public class MainController {
     private ImageView imageView;
 
     @FXML
-    private Canvas canvas;
+    private StackPane layersPane;
+
+    @FXML
+    private ListView<Layer> layersList;
 
     @FXML
     private TextField zoomTextField;
@@ -190,9 +200,6 @@ public class MainController {
 
     @FXML
     private ComboBox<String> filterComboBox;
-
-    @FXML
-    private ListView<String> layersList;
 
     @FXML
     private Slider brightnessSlider;
@@ -293,10 +300,11 @@ public class MainController {
             scrollPane.addEventFilter(MouseEvent.MOUSE_RELEASED, this::scrollPaneEventMouseReleased);
         }
 
-        // Инициализация GraphicsContext для рисования на Canvas
-        gc = canvas.getGraphicsContext2D();
-        gc.setStroke(Color.WHITE);
-        gc.setLineWidth(2);
+        // Создание нового списка слоев
+        layers = FXCollections.observableArrayList();
+        layersList.setItems(layers);
+        layerCanvases = new ArrayList<>();
+        logger.info("LayersController initialized");
 
         // Инициализация обработчика изменения значения слайдера
         speedSlider.valueProperty().addListener((observable, oldValue, newValue) -> speed = newValue.doubleValue());
@@ -304,14 +312,6 @@ public class MainController {
         // Установка обработчиков событий для настроек
         colorPicker.setOnAction(event -> gc.setStroke(colorPicker.getValue()));
         lineWidthSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setLineWidth(newValue.doubleValue()));
-
-        // Установка обработчиков событий мыши для рисования
-        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::canvasEventMousePressed);
-        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::canvasEventMouseDragged);
-        canvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::canvasEventMouseReleased);
-
-        // Установка обработчика мыши для обновления координат
-        canvas.addEventHandler(MouseEvent.MOUSE_MOVED, this::canvasEventMouseMoved);
 
         // Инициализация других компонентов и обработчиков событий
         textColorPicker.setOnAction(event -> gc.setFill(textColorPicker.getValue()));
@@ -322,9 +322,6 @@ public class MainController {
 
         // Добавление фильтров в ComboBox
         filterComboBox.getItems().addAll("Grayscale", "Sepia", "Invert", "Blur", "Noise", "Pixelate", "Posterize");
-
-        // Инициализация списка слоев
-        layersList.getItems().addAll("Layer 1", "Layer 2", "Layer 3");
     }
 
     // Обработчик диалогов
@@ -492,7 +489,7 @@ public class MainController {
         coordinates.setText(lastX + ", " + lastY);
     }
 
-    // Метод для кнопки загрузка изображения
+    // Метод для кнопки загрузки изображения
     @FXML
     private void loadImage() {
         FileChooser fileChooser = new FileChooser();
@@ -506,11 +503,12 @@ public class MainController {
             model.loadImage(originalPath);
             imageView.setImage(model.getImage());
             leftBox.setVisible(true);
-            // Очистка содержимого canvas
-            canvasClear();
-            canvas.setWidth(imageView.getImage().getWidth());
-            canvas.setHeight(imageView.getImage().getHeight());
-            updateZoom();
+            // Создание нового списка слоев
+            layers = FXCollections.observableArrayList();
+            layersList.setItems(layers);
+            layerCanvases = new ArrayList<>();
+            addLayer();
+            // updateZoom();
             logger.info("Image loaded from: {}", originalPath);
         } else {
             logger.warn("No image file selected");
@@ -533,8 +531,8 @@ public class MainController {
             try {
                 javafx.scene.image.Image image = model.getImage();
                 if (image != null) {
-                    // Объединение изображения с содержимым холста
-                    WritableImage combinedImage = combineImageWithCanvas(image);
+                    // Объединение изображения с содержимым всех слоев
+                    WritableImage combinedImage = combineImageWithLayers(image);
                     BufferedImage bufferedImage = SwingFXUtils.fromFXImage(combinedImage, null);
                     String format = getFileExtension(file);
                     ImageIO.write(bufferedImage, format, file);
@@ -555,37 +553,15 @@ public class MainController {
         }
     }
 
-    // Метод объединения изображения с содержимым холста
-    private WritableImage combineImageWithCanvas(javafx.scene.image.Image image) {
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
-        WritableImage combinedImage = new WritableImage(width, height);
-        PixelWriter writer = combinedImage.getPixelWriter();
-
-        // Рисование изображения на объединенное изображение
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                writer.setColor(x, y, image.getPixelReader().getColor(x, y));
-            }
+    // Метод для объединения изображения с содержимым всех слоев
+    private WritableImage combineImageWithLayers(Image baseImage) {
+        Canvas combinedCanvas = new Canvas(baseImage.getWidth(), baseImage.getHeight());
+        GraphicsContext gc = combinedCanvas.getGraphicsContext2D();
+        gc.drawImage(baseImage, 0, 0);
+        for (Canvas canvas : layerCanvases) {
+            gc.drawImage(canvas.snapshot(null, null), 0, 0);
         }
-
-        // Рисование содержимого холста на объединенное изображение
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-        WritableImage canvasImage = canvas.snapshot(params, null);
-        int canvasWidth = (int) canvas.getWidth();
-        int canvasHeight = (int) canvas.getHeight();
-
-        for (int y = 0; y < Math.min(height, canvasHeight); y++) {
-            for (int x = 0; x < Math.min(width, canvasWidth); x++) {
-                Color canvasColor = canvasImage.getPixelReader().getColor(x, y);
-                if (canvasColor.getOpacity() > 0) {
-                    writer.setColor(x, y, canvasColor);
-                }
-            }
-        }
-
-        return combinedImage;
+        return combinedCanvas.snapshot(null, null);
     }
 
     // Получение расширения файла
@@ -681,6 +657,10 @@ public class MainController {
         currentMode = "DRAW";
         logger.info("Switched to Draw Mode");
 
+        // Очистка значений
+        colorPicker.setValue(Color.WHITE);
+        lineWidthSlider.setValue(2);
+
         // Отображение настроек мода
         selectButton(button_draw_mode, settings_draw_mode);
     }
@@ -751,6 +731,8 @@ public class MainController {
         textX.setText("");
         textY.setText("");
         textInput.setText("");
+        textColorPicker.setValue(Color.WHITE);
+        textSizeSlider.setValue(2);
 
         // Отображение настроек мода
         selectButton(button_text_mode, settings_text_mode);
@@ -910,14 +892,135 @@ public class MainController {
         selectButton(button_layers_mode, settings_layers_mode);
     }
 
+    // Метод для кнопки добавления слоя
     @FXML
     private void addLayer() {
-        // Логика добавления нового слоя
+        Canvas newCanvas = new Canvas(imageView.getImage().getWidth(), imageView.getImage().getHeight());
+
+        // Инициализация GraphicsContext для рисования на Canvas
+        gc = newCanvas.getGraphicsContext2D();
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(2);
+
+        // Установка обработчиков событий мыши для рисования
+        newCanvas.addEventHandler(MouseEvent.MOUSE_PRESSED, this::canvasEventMousePressed);
+        newCanvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::canvasEventMouseDragged);
+        newCanvas.addEventHandler(MouseEvent.MOUSE_RELEASED, this::canvasEventMouseReleased);
+
+        // Установка обработчика мыши для обновления координат
+        newCanvas.addEventHandler(MouseEvent.MOUSE_MOVED, this::canvasEventMouseMoved);
+
+        // Добавляем новый Canvas в начало списка
+        layersPane.getChildren().addFirst(newCanvas);
+        Layer newLayer = new Layer("Layer " + (layers.size() + 1), true, newCanvas);
+        // Добавляем новый слой в начало списка
+        layers.addFirst(newLayer);
+        // Добавляем новый Canvas в начало списка
+        layerCanvases.addFirst(newCanvas);
+        updateLayerOrder();
+        logger.info("New layer added: {}", newLayer.getName());
     }
 
+    // Метод для кнопки удаления слоя
     @FXML
     private void removeLayer() {
-        // Логика удаления выбранного слоя
+        Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
+        if (selectedLayer != null) {
+            layersPane.getChildren().remove(selectedLayer.getCanvas());
+            layers.remove(selectedLayer);
+            layerCanvases.remove(selectedLayer.getCanvas());
+            logger.info("Layer removed: {}", selectedLayer.getName());
+        } else {
+            logger.warn("No layer selected for removal");
+        }
+    }
+
+    // Метод для кнопки перемещения наверх
+    @FXML
+    private void moveLayerUp() {
+        Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
+        if (selectedLayer != null) {
+            int index = layers.indexOf(selectedLayer);
+            if (index > 0) {
+                layers.remove(index);
+                layers.add(index - 1, selectedLayer);
+                layersList.getSelectionModel().select(index - 1);
+                updateLayerOrder();
+                logger.info("Layer moved up: {}", selectedLayer.getName());
+            } else {
+                logger.warn("Layer is already at the top: {}", selectedLayer.getName());
+            }
+        } else {
+            logger.warn("No layer selected for moving up");
+        }
+    }
+
+    // Метод для кнопки перемещения вниз
+    @FXML
+    private void moveLayerDown() {
+        Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
+        if (selectedLayer != null) {
+            int index = layers.indexOf(selectedLayer);
+            if (index < layers.size() - 1) {
+                layers.remove(index);
+                layers.add(index + 1, selectedLayer);
+                layersList.getSelectionModel().select(index + 1);
+                updateLayerOrder();
+                logger.info("Layer moved down: {}", selectedLayer.getName());
+            } else {
+                logger.warn("Layer is already at the bottom: {}", selectedLayer.getName());
+            }
+        } else {
+            logger.warn("No layer selected for moving down");
+        }
+    }
+
+    // Метод для кнопки переключения видимости
+    @FXML
+    private void toggleLayerVisibility() {
+        Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
+        if (selectedLayer != null) {
+            selectedLayer.setVisible(!selectedLayer.isVisible());
+            selectedLayer.getCanvas().setVisible(selectedLayer.isVisible());
+            layersList.refresh();
+            logger.info("Layer visibility toggled: {} (Visible: {})", selectedLayer.getName(), selectedLayer.isVisible());
+        } else {
+            logger.warn("No layer selected for toggling visibility");
+        }
+    }
+
+    // Метод для кнопки слияние слоев
+    @FXML
+    private void mergeLayers() {
+        if (layers.size() > 1) {
+            Canvas mergedCanvas = new Canvas(imageView.getImage().getWidth(), imageView.getImage().getHeight());
+            GraphicsContext mergedGc = mergedCanvas.getGraphicsContext2D();
+            // Сохранение всех canvas с прозрачным фоном
+            SnapshotParameters params = new SnapshotParameters();
+            params.setFill(javafx.scene.paint.Color.TRANSPARENT);
+            for (Canvas canvas : layerCanvases) {
+                mergedGc.drawImage(canvas.snapshot(params, null), 0, 0);
+            }
+            layerCanvases.clear();
+            layersPane.getChildren().clear();
+            layers.clear();
+            layers.add(new Layer("Merged Layer", true, mergedCanvas));
+            layerCanvases.add(mergedCanvas);
+            layersPane.getChildren().add(mergedCanvas);
+            updateLayerOrder();
+            logger.info("Layers merged into a single layer");
+        } else {
+            logger.warn("Not enough layers to merge");
+        }
+    }
+
+    // Метод для обновления отображение всех canvas
+    private void updateLayerOrder() {
+        layersPane.getChildren().clear();
+        for (int i = layers.size() - 1; i >= 0; i--) {
+            layersPane.getChildren().add(layers.get(i).getCanvas());
+        }
+        logger.info("Layer order updated");
     }
 
     // Метод для кнопки переключения на режим яркости и контраста
@@ -1025,8 +1128,8 @@ public class MainController {
         // Сохранение текущего содержимого canvas с прозрачным фоном
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-        canvas.snapshot(params, snapshot);
+        // WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+        // canvas.snapshot(params, snapshot);
 
         // Очистка canvas
         canvasClear();
@@ -1036,11 +1139,11 @@ public class MainController {
         gc.scale(zoomLevel, zoomLevel);
 
         // Установка новых масштабов для canvas
-        canvas.setWidth(newWidth);
-        canvas.setHeight(newHeight);
+        // canvas.setWidth(newWidth);
+        // canvas.setHeight(newHeight);
 
         // Перерисовка содержимого canvas с новым масштабом
-        gc.drawImage(snapshot, 0, 0, canvas.getWidth() / zoomLevel, canvas.getHeight() / zoomLevel);
+        // gc.drawImage(snapshot, 0, 0, canvas.getWidth() / zoomLevel, canvas.getHeight() / zoomLevel);
 
         // Установка новых масштабов для zoomTextField
         zoomTextField.setText(String.format("%.0f%%", zoomLevel * 100));
@@ -1059,7 +1162,7 @@ public class MainController {
             // Удаление старых элементов из StackPane
             stackPane.getChildren().clear();
             // Добавление обновленных элементов в StackPane
-            stackPane.getChildren().addAll(imageView, canvas);
+            //stackPane.getChildren().addAll(imageView, canvas);
             // Установка стилей для StackPane
             stackPane.getStyleClass().add("stack-pane");
             // Установка нового содержимого в ScrollPane
@@ -1073,7 +1176,7 @@ public class MainController {
 
     // Метод очистки содержимого canvas
     private void canvasClear() {
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
     }
 
     // Метод для создания и отображения уведомления

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!-- Импорт необходимых классов из библиотеки JavaFX -->
-<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -31,8 +30,8 @@
             <StackPane styleClass="stack-pane">
                 <!-- Элемент ImageView для отображения изображения -->
                 <ImageView fx:id="imageView" preserveRatio="true" />
-                <!-- Элемент Canvas для рисования -->
-                <Canvas fx:id="canvas" />
+                <!-- Элемент StackPane для слоев Canvas -->
+                <StackPane fx:id="layersPane" />
             </StackPane>
         </ScrollPane>
     </center>
@@ -121,6 +120,10 @@
                     <ListView fx:id="layersList" />
                     <Button styleClass="button" text="%add_layer" onAction="#addLayer" />
                     <Button styleClass="button" text="%remove_layer" onAction="#removeLayer" />
+                    <Button styleClass="button" text="%move_layer_up" onAction="#moveLayerUp" />
+                    <Button styleClass="button" text="%move_layer_down" onAction="#moveLayerDown" />
+                    <Button styleClass="button" text="%toggle_layer_visibility" onAction="#toggleLayerVisibility" />
+                    <Button styleClass="button" text="%merge_layers" onAction="#mergeLayers" />
                 </VBox>
                 <!-- Настройки режима яркости и контраста -->
                 <VBox styleClass="settings-vbox" fx:id="settings_brightness_and_contrast_mode" visible="false">
