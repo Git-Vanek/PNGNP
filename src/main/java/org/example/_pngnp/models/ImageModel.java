@@ -44,6 +44,12 @@ public class ImageModel {
         return image;
     }
 
+    // Метод для установки текущего изображения
+    public void setImage(Image image) {
+        logger.info("Setting current image");
+        this.image = image;
+    }
+
     // Применение обрезки к изображению
     public void applyCrop(int x, int y, int width, int height) {
         WritableImage croppedImage = new WritableImage(width, height);
@@ -62,18 +68,18 @@ public class ImageModel {
     }
 
     // Метод для применения фильтра к изображению
-    public Image setFilter(Image image, String selectedFilter) {
+    public Image setFilter(Image currentImage, String selectedFilter) {
         logger.info("Applying filter to image");
         // Применение фильтра к изображению
         switch (selectedFilter) {
             case "Grayscale":
-                image = applyFilter((x, y, color) -> {
+                currentImage = applyFilter(currentImage, (int x, int y, Color color) -> {
                     double gray = 0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue();
                     return Color.gray(gray);
                 });
                 break;
             case "Sepia":
-                image = applyFilter((x, y, color) -> {
+                currentImage = applyFilter(currentImage, (int x, int y, Color color) -> {
                     double r = 0.393 * color.getRed() + 0.769 * color.getGreen() + 0.189 * color.getBlue();
                     double g = 0.349 * color.getRed() + 0.686 * color.getGreen() + 0.168 * color.getBlue();
                     double b = 0.272 * color.getRed() + 0.534 * color.getGreen() + 0.131 * color.getBlue();
@@ -81,17 +87,66 @@ public class ImageModel {
                 });
                 break;
             case "Invert":
-                image = applyFilter((x, y, color) -> Color.color(1 - color.getRed(), 1 - color.getGreen(), 1 - color.getBlue()));
+                currentImage = applyFilter(currentImage, (int x, int y, Color color) -> Color.color(1 - color.getRed(), 1 - color.getGreen(), 1 - color.getBlue()));
+                break;
+            case "Blur":
+                Image finalCurrentImage = currentImage;
+                currentImage = applyFilter(currentImage, (int x, int y, Color color) -> {
+                    int kernelSize = 3;
+                    double r = 0, g = 0, b = 0;
+                    int count = 0;
+                    for (int ky = -kernelSize / 2; ky <= kernelSize / 2; ky++) {
+                        for (int kx = -kernelSize / 2; kx <= kernelSize / 2; kx++) {
+                            int nx = x + kx;
+                            int ny = y + ky;
+                            if (nx >= 0 && nx < finalCurrentImage.getWidth() && ny >= 0 && ny < finalCurrentImage.getHeight()) {
+                                Color neighborColor = finalCurrentImage.getPixelReader().getColor(nx, ny);
+                                r += neighborColor.getRed();
+                                g += neighborColor.getGreen();
+                                b += neighborColor.getBlue();
+                                count++;
+                            }
+                        }
+                    }
+                    return Color.color(r / count, g / count, b / count);
+                });
+                break;
+            case "Noise":
+                currentImage = applyFilter(currentImage, (int x, int y, Color color) -> {
+                    double noiseFactor = 0.2; // Пример значения шума
+                    double r = color.getRed() + (Math.random() - 0.5) * noiseFactor;
+                    double g = color.getGreen() + (Math.random() - 0.5) * noiseFactor;
+                    double b = color.getBlue() + (Math.random() - 0.5) * noiseFactor;
+                    return Color.color(Math.min(1, Math.max(0, r)), Math.min(1, Math.max(0, g)), Math.min(1, Math.max(0, b)));
+                });
+                break;
+            case "Pixelate":
+                Image finalCurrentImage4 = currentImage;
+                currentImage = applyFilter(currentImage, (int x, int y, Color color) -> {
+                    int pixelSize = 10; // Пример размера пикселя
+                    int nx = (x / pixelSize) * pixelSize;
+                    int ny = (y / pixelSize) * pixelSize;
+                    return finalCurrentImage4.getPixelReader().getColor(nx, ny);
+                });
+                break;
+            case "Posterize":
+                currentImage = applyFilter(currentImage, (int x, int y, Color color) -> {
+                    int levels = 4; // Пример количества уровней
+                    double r = (double) Math.round(color.getRed() * levels) / levels;
+                    double g = (double) Math.round(color.getGreen() * levels) / levels;
+                    double b = (double) Math.round(color.getBlue() * levels) / levels;
+                    return Color.color(r, g, b);
+                });
                 break;
             default:
                 logger.warn("Unknown filter: {}", selectedFilter);
                 break;
         }
-        return image;
+        return currentImage;
     }
 
     // Приватный метод для применения фильтра к изображению
-    private Image applyFilter(FilterFunction filterFunction) {
+    private Image applyFilter(Image image, FilterFunction filterFunction) {
         // Получение ширины и высоты изображения
         int width = (int) image.getWidth();
         int height = (int) image.getHeight();

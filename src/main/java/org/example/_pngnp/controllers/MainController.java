@@ -268,8 +268,8 @@ public class MainController {
                     if (newZoomLevel > 0) {
                         if (imageView.getImage() != null) {
                             // Ограничение минимального и максимального значения масштаба
-                            if (newZoomLevel < 0.1) {
-                                newZoomLevel = 0.1;
+                            if (newZoomLevel < 1) {
+                                newZoomLevel = 1;
                             } else if (newZoomLevel > 5.0) {
                                 newZoomLevel = 5.0;
                             }
@@ -321,7 +321,7 @@ public class MainController {
         stickerComboBox.getItems().addAll("raiden", "sonic", "vergil");
 
         // Добавление фильтров в ComboBox
-        filterComboBox.getItems().addAll("Grayscale", "Sepia", "Invert");
+        filterComboBox.getItems().addAll("Grayscale", "Sepia", "Invert", "Blur", "Noise", "Pixelate", "Posterize");
 
         // Инициализация списка слоев
         layersList.getItems().addAll("Layer 1", "Layer 2", "Layer 3");
@@ -638,6 +638,8 @@ public class MainController {
 
     // Метод для переключения кнопок и контейнеров
     private void selectButton(Button button, VBox settings) {
+        // Обновление изображения
+        imageView.setImage(model.getImage());
         // Сбросить стиль всех кнопок
         button_toggle_mode.getStyleClass().remove("button-selected");
         button_draw_mode.getStyleClass().remove("button-selected");
@@ -668,6 +670,8 @@ public class MainController {
     private void toggleMode() {
         currentMode = "DRAG";
         logger.info("Switched to Drag Mode");
+
+        // Отображение настроек мода
         selectButton(button_toggle_mode, settings_toggle_mode);
     }
 
@@ -676,6 +680,8 @@ public class MainController {
     private void drawMode() {
         currentMode = "DRAW";
         logger.info("Switched to Draw Mode");
+
+        // Отображение настроек мода
         selectButton(button_draw_mode, settings_draw_mode);
     }
 
@@ -684,6 +690,14 @@ public class MainController {
     private void cropMode() {
         currentMode = "CROP";
         logger.info("Switched to Crop Mode");
+
+        // Очистка значений
+        cropX.setText("");
+        cropY.setText("");
+        cropWidth.setText("");
+        cropHeight.setText("");
+
+        // Отображение настроек мода
         selectButton(button_crop_mode, settings_crop_mode);
     }
 
@@ -731,6 +745,14 @@ public class MainController {
     private void textMode() {
         currentMode = "TEXT";
         logger.info("Switched to Text Mode");
+
+        // Очистка значений
+        stickerComboBox.setValue("");
+        textX.setText("");
+        textY.setText("");
+        textInput.setText("");
+
+        // Отображение настроек мода
         selectButton(button_text_mode, settings_text_mode);
     }
 
@@ -781,6 +803,12 @@ public class MainController {
     private void stickersMode() {
         currentMode = "STICKERS";
         logger.info("Switched to Stickers Mode");
+
+        // Очистка значений
+        stickerX.setText("");
+        stickerY.setText("");
+
+        // Отображение настроек мода
         selectButton(button_stickers_mode, settings_stickers_mode);
     }
 
@@ -830,12 +858,17 @@ public class MainController {
     private void filtersMode() {
         currentMode = "FILTERS";
         logger.info("Switched to Filters Mode");
+
+        // Очистка значений
+        filterComboBox.setValue("");
+
+        // Отображение настроек мода
         selectButton(button_filters_mode, settings_filters_mode);
     }
 
-    // Метод для кнопки добавления фильтра
+    // Метод применения фильтра к изображению
     @FXML
-    private void applyFilter() {
+    private void setFilter() {
         // Проверка на заполненные поля
         if (filterComboBox.getValue() == null) {
             // Вывод уведомления об ошибке, если поля не заполнены
@@ -845,7 +878,7 @@ public class MainController {
 
         // Применение фильтра
         String selectedFilter = filterComboBox.getValue();
-        Image filteredImage = model.setFilter(model.getImage(), selectedFilter);
+        Image filteredImage = model.setFilter(imageView.getImage(), selectedFilter);
 
         // Обновление изображения
         imageView.setImage(filteredImage);
@@ -854,8 +887,17 @@ public class MainController {
     // Метод для кнопки удаления фильтра
     @FXML
     private void deleteFilter() {
+        filterComboBox.setValue("");
         // Обновление изображения
         imageView.setImage(model.getImage());
+    }
+
+    // Метод для установки фильтра
+    @FXML
+    private void applyFilter() {
+        filterComboBox.setValue("");
+        // Установка изображения с фильтром
+        model.setImage(imageView.getImage());
     }
 
     // Метод для кнопки переключения на режим работы со слоями
@@ -863,6 +905,8 @@ public class MainController {
     private void layersMode() {
         currentMode = "LAYERS";
         logger.info("Switched to Layers Mode");
+
+        // Отображение настроек мода
         selectButton(button_layers_mode, settings_layers_mode);
     }
 
@@ -881,6 +925,8 @@ public class MainController {
     private void brightnessAndContrastMode() {
         currentMode = "BRIGHTNESS_AND_CONTRAST";
         logger.info("Switched to Brightness and Contrast Mode");
+
+        // Отображение настроек мода
         selectButton(button_brightness_and_contrast_mode, settings_brightness_and_contrast_mode);
     }
 
