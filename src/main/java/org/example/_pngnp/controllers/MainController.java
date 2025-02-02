@@ -435,6 +435,10 @@ public class MainController {
 
     // Метод для начала рисования
     private void startDrawing(MouseEvent event) {
+        // Сохранение до изменений
+        model.setLayerCanvasesModel(layerCanvases);
+        setUndo();
+
         drawing = true;
         defaultPressed(event);
     }
@@ -500,7 +504,7 @@ public class MainController {
         if (file != null) {
             String originalPath = file.getAbsolutePath();
             model.loadImage(originalPath);
-            imageView.setImage(model.getImage());
+            imageView.setImage(model.getImageModel());
             leftBox.setVisible(true);
             // Создание нового списка слоев
             layers = FXCollections.observableArrayList();
@@ -509,6 +513,8 @@ public class MainController {
             addLayer();
             updateZoom();
             logger.info("Image loaded from: {}", originalPath);
+            undoStack.clear();
+            redoStack.clear();
         } else {
             logger.warn("No image file selected");
             showNotification("Warning", "No image file selected");
@@ -528,7 +534,7 @@ public class MainController {
         File file = fileChooser.showSaveDialog(primaryStage);
         if (file != null) {
             try {
-                javafx.scene.image.Image image = model.getImage();
+                javafx.scene.image.Image image = model.getImageModel();
                 if (image != null) {
                     // Объединение изображения с содержимым всех слоев
                     WritableImage combinedImage = combineImageWithLayers(image);
@@ -613,8 +619,6 @@ public class MainController {
 
     // Метод для переключения кнопок и контейнеров
     private void selectButton(Button button, VBox settings) {
-        // Обновление изображения
-        imageView.setImage(model.getImage());
         // Сбросить стиль всех кнопок
         button_toggle_mode.getStyleClass().remove("button-selected");
         button_draw_mode.getStyleClass().remove("button-selected");
@@ -711,10 +715,11 @@ public class MainController {
             // Вывод уведомления об ошибке в параметрах обрезания
             showNotification("Error", "Crop zone does not have to go beyond the area of the image");
         } else {
+            setUndo();
             // Применение обрезания
             model.applyCrop((int) x, (int) y, (int) width, (int) height);
             // Установка изображения и обновление масштабов
-            imageView.setImage(model.getImage());
+            imageView.setImage(model.getImageModel());
             updateZoom();
         }
     }
@@ -766,6 +771,10 @@ public class MainController {
             // Вывод уведомления об ошибке в параметрах обрезания
             showNotification("Error", "Entry point does not have to go beyond the area of the image");
         } else {
+            // Сохранение до изменений
+            model.setLayerCanvasesModel(layerCanvases);
+            setUndo();
+
             // Получение других параметров
             String text = textInput.getText();
             Color color = textColorPicker.getValue();
@@ -822,6 +831,10 @@ public class MainController {
             // Вывод уведомления об ошибке в параметрах обрезания
             showNotification("Error", "Entry point does not have to go beyond the area of the image");
         } else {
+            // Сохранение до изменений
+            model.setLayerCanvasesModel(layerCanvases);
+            setUndo();
+
             // Получение стикера
             String selectedSticker = stickerComboBox.getValue();
             Image stickerImage = new Image(Objects.requireNonNull(getClass().
@@ -870,15 +883,19 @@ public class MainController {
     private void deleteFilter() {
         filterComboBox.setValue("");
         // Обновление изображения
-        imageView.setImage(model.getImage());
+        imageView.setImage(model.getImageModel());
     }
 
     // Метод для установки фильтра
     @FXML
     private void applyFilter() {
+        // Сохранение до изменений
+        setUndo();
+
         filterComboBox.setValue("");
+
         // Установка изображения с фильтром
-        model.setImage(imageView.getImage());
+        model.setImageModel(imageView.getImage());
     }
 
     // Метод для кнопки переключения на режим работы со слоями
@@ -894,6 +911,11 @@ public class MainController {
     // Метод для кнопки добавления слоя
     @FXML
     private void addLayer() {
+        // Сохранение до изменений
+        model.setLayersModel(layers);
+        model.setLayerCanvasesModel(layerCanvases);
+        setUndo();
+
         Canvas newCanvas = new Canvas(imageView.getImage().getWidth(), imageView.getImage().getHeight());
 
         // Инициализация GraphicsContext для рисования на Canvas
@@ -925,6 +947,11 @@ public class MainController {
     private void removeLayer() {
         Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
         if (selectedLayer != null) {
+            // Сохранение до изменений
+            model.setLayersModel(layers);
+            model.setLayerCanvasesModel(layerCanvases);
+            setUndo();
+
             layersPane.getChildren().remove(selectedLayer.getCanvas());
             layers.remove(selectedLayer);
             layerCanvases.remove(selectedLayer.getCanvas());
@@ -941,6 +968,11 @@ public class MainController {
         if (selectedLayer != null) {
             int index = layers.indexOf(selectedLayer);
             if (index > 0) {
+                // Сохранение до изменений
+                model.setLayersModel(layers);
+                model.setLayerCanvasesModel(layerCanvases);
+                setUndo();
+
                 layers.remove(index);
                 layers.add(index - 1, selectedLayer);
                 layersList.getSelectionModel().select(index - 1);
@@ -961,6 +993,11 @@ public class MainController {
         if (selectedLayer != null) {
             int index = layers.indexOf(selectedLayer);
             if (index < layers.size() - 1) {
+                // Сохранение до изменений
+                model.setLayersModel(layers);
+                model.setLayerCanvasesModel(layerCanvases);
+                setUndo();
+
                 layers.remove(index);
                 layers.add(index + 1, selectedLayer);
                 layersList.getSelectionModel().select(index + 1);
@@ -979,10 +1016,16 @@ public class MainController {
     private void toggleLayerVisibility() {
         Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
         if (selectedLayer != null) {
+            // Сохранение до изменений
+            model.setLayersModel(layers);
+            model.setLayerCanvasesModel(layerCanvases);
+            setUndo();
+
             selectedLayer.setVisible(!selectedLayer.isVisible());
             selectedLayer.getCanvas().setVisible(selectedLayer.isVisible());
             layersList.refresh();
-            logger.info("Layer visibility toggled: {} (Visible: {})", selectedLayer.getName(), selectedLayer.isVisible());
+            logger.info("Layer visibility toggled: {} (Visible: {})", selectedLayer.getName(),
+                    selectedLayer.isVisible());
         } else {
             logger.warn("No layer selected for toggling visibility");
         }
@@ -992,6 +1035,11 @@ public class MainController {
     @FXML
     private void mergeLayers() {
         if (layers.size() > 1) {
+            // Сохранение до изменений
+            model.setLayersModel(layers);
+            model.setLayerCanvasesModel(layerCanvases);
+            setUndo();
+
             Canvas mergedCanvas = new Canvas(imageView.getImage().getWidth(), imageView.getImage().getHeight());
             GraphicsContext mergedGc = mergedCanvas.getGraphicsContext2D();
             // Сохранение всех canvas с прозрачным фоном
@@ -1044,6 +1092,14 @@ public class MainController {
         imageView.setImage(adjustedImage);
     }
 
+    // Метод для установки отмены изменений
+    public void setUndo() {
+        // Сохранение текущего состояния в undoStack
+        undoStack.push(model.clone());
+        // Очистка содержимого redoStack
+        redoStack.clear();
+    }
+
     // Метод для кнопки отмены действия
     @FXML
     private void undo() {
@@ -1076,7 +1132,15 @@ public class MainController {
 
     // Метод для обновления ImageView
     private void updateImageView() {
-        imageView.setImage(model.getImage());
+        imageView.setImage(model.getImageModel());
+        layers = model.getLayersModel();
+        layerCanvases = model.getLayerCanvasesModel();
+
+        // Обновление отображений
+        layersList.refresh();
+        layersList.setItems(layers);
+        updateLayerOrder();
+        updateZoom();
     }
 
     // Метод для кнопки увеличения масштаба

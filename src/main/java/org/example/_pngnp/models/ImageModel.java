@@ -2,6 +2,12 @@
 package org.example._pngnp.models;
 
 // Импорт необходимых классов из библиотеки JavaFX для работы с изображениями
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -9,19 +15,22 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example._pngnp.classes.Layer;
 
-import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 // Объявление класса ImageModel
-public class ImageModel {
+public class ImageModel implements Cloneable {
 
     // Приватное поле для хранения изображения
-    private Image image;
+    private Image imageModel;
 
-    // Приватное поле для хранения canvas
-    private Canvas canvas;
+    // Приватное поле для хранения изменений
+    private ObservableList<Layer> layersModel;
+    private List<Canvas> layerCanvasesModel;
 
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(ImageModel.class);
@@ -30,7 +39,7 @@ public class ImageModel {
     public void loadImage(String filePath) {
         try {
             // Загрузка изображения из файла
-            image = new Image(new FileInputStream(filePath));
+            imageModel = new Image(new FileInputStream(filePath));
             logger.info("Image loaded successfully from: {}", filePath);
         } catch (FileNotFoundException e) {
             // Обработка исключения, если файл не найден
@@ -39,21 +48,45 @@ public class ImageModel {
     }
 
     // Метод для получения текущего изображения
-    public Image getImage() {
+    public Image getImageModel() {
         logger.info("Getting current image");
-        return image;
+        return imageModel;
     }
 
     // Метод для установки текущего изображения
-    public void setImage(Image image) {
+    public void setImageModel(Image imageModel) {
         logger.info("Setting current image");
-        this.image = image;
+        this.imageModel = imageModel;
+    }
+
+    // Метод для получения изменений
+    public ObservableList<Layer> getLayersModel() {
+        logger.info("Getting current layers");
+        return layersModel;
+    }
+
+    // Метод для установки изменений
+    public void setLayersModel(ObservableList<Layer> layersModel) {
+        logger.info("Setting current layers");
+        this.layersModel = layersModel;
+    }
+
+    // Метод для получения изменений Canvas
+    public List<Canvas> getLayerCanvasesModel() {
+        logger.info("Getting current layerCanvases");
+        return layerCanvasesModel;
+    }
+
+    // Метод для установки изменений Canvas
+    public void setLayerCanvasesModel(List<Canvas> layerCanvasesModel) {
+        logger.info("Setting current layerCanvases");
+        this.layerCanvasesModel = layerCanvasesModel;
     }
 
     // Применение обрезки к изображению
     public void applyCrop(int x, int y, int width, int height) {
         WritableImage croppedImage = new WritableImage(width, height);
-        PixelReader pixelReader = image.getPixelReader();
+        PixelReader pixelReader = imageModel.getPixelReader();
         PixelWriter pixelWriter = croppedImage.getPixelWriter();
 
         for (int i = 0; i < width; i++) {
@@ -64,7 +97,7 @@ public class ImageModel {
 
         // Установка нового изображения в модели
         logger.info("Image has been cropped");
-        image = croppedImage;
+        imageModel = croppedImage;
     }
 
     // Метод для применения фильтра к изображению
@@ -186,10 +219,10 @@ public class ImageModel {
 
     // Метод применения яркости и контраста к изображению
     public Image adjustBrightnessAndContrast(double brightness, double contrast) {
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
+        int width = (int) imageModel.getWidth();
+        int height = (int) imageModel.getHeight();
         WritableImage adjustedImage = new WritableImage(width, height);
-        PixelReader pixelReader = image.getPixelReader();
+        PixelReader pixelReader = imageModel.getPixelReader();
         PixelWriter pixelWriter = adjustedImage.getPixelWriter();
 
         double factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
@@ -228,10 +261,28 @@ public class ImageModel {
     public ImageModel clone() {
         try {
             ImageModel clone = (ImageModel) super.clone();
+
             // Клонирование изображения
-            clone.image = new Image(image.getUrl());
-            // Клонирование содержимого canvas
-            clone.canvas = new Canvas(canvas.getGraphicsConfiguration());
+            clone.imageModel = new WritableImage(imageModel.getPixelReader(), (int) imageModel.getWidth(), (int) imageModel.getHeight());
+
+            // Клонирование списка слоев
+            clone.layersModel = FXCollections.observableArrayList();
+            for (Layer layer : layersModel) {
+                clone.layersModel.add(layer.clone());
+            }
+
+            // Клонирование списка layerCanvases
+            clone.layerCanvasesModel = new ArrayList<>();
+            // Сохранение всех canvas с прозрачным фоном
+            SnapshotParameters params = new SnapshotParameters();
+            params.setFill(Color.TRANSPARENT);
+            for (Canvas layerCanvas : layerCanvasesModel) {
+                Canvas clonedCanvas = new Canvas();
+                GraphicsContext gc = clonedCanvas.getGraphicsContext2D();
+                gc.drawImage(layerCanvas.snapshot(params, null), 0, 0);
+                clone.layerCanvasesModel.add(clonedCanvas);
+            }
+
             logger.info("ImageModel cloned successfully");
             return clone;
         } catch (CloneNotSupportedException e) {
