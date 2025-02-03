@@ -18,6 +18,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -84,6 +85,8 @@ public class MainController {
     // Списки слоев
     private ObservableList<Layer> layers;
     private List<Canvas> layerCanvases;
+
+    private ResourceBundle resources;
 
     // Аннотации FXML для связывания с элементами интерфейса
     @FXML
@@ -216,8 +219,9 @@ public class MainController {
     }
 
     // Метод установки основного окна приложения, обработчика закрытия и темы
-    public void setPrimaryStage(Stage primaryStage) {
+    public void setPrimaryStage(Stage primaryStage, ResourceBundle resources) {
         this.primaryStage = primaryStage;
+        this.resources = resources;
 
         // Установка темы
         setTheme();
@@ -306,15 +310,20 @@ public class MainController {
         logger.info("LayersController initialized");
 
         // Инициализация обработчика изменения значения слайдера
-        speedSlider.valueProperty().addListener((observable, oldValue, newValue) -> speed = newValue.doubleValue());
+        speedSlider.valueProperty().addListener((observable,
+                                                 oldValue, newValue) -> speed = newValue.doubleValue());
 
         // Установка обработчиков событий для настроек
         colorPicker.setOnAction(event -> gc.setStroke(colorPicker.getValue()));
-        lineWidthSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setLineWidth(newValue.doubleValue()));
+        lineWidthSlider.valueProperty().addListener((observable,
+                                                     oldValue, newValue) ->
+                gc.setLineWidth(newValue.doubleValue()));
 
         // Инициализация других компонентов и обработчиков событий
         textColorPicker.setOnAction(event -> gc.setFill(textColorPicker.getValue()));
-        textSizeSlider.valueProperty().addListener((observable, oldValue, newValue) -> gc.setFont(new Font(newValue.doubleValue())));
+        textSizeSlider.valueProperty().addListener((observable,
+                                                    oldValue, newValue) ->
+                gc.setFont(new Font(newValue.doubleValue())));
 
         // Добавление стикеров в ComboBox
         stickerComboBox.getItems().addAll("raiden", "sonic", "vergil");
@@ -436,7 +445,6 @@ public class MainController {
     // Метод для начала рисования
     private void startDrawing(MouseEvent event) {
         // Сохранение до изменений
-        model.setLayerCanvasesModel(layerCanvases);
         setUndo();
 
         drawing = true;
@@ -510,6 +518,10 @@ public class MainController {
             layers = FXCollections.observableArrayList();
             layersList.setItems(layers);
             layerCanvases = new ArrayList<>();
+            if (currentMode.equals("DRAW")) {
+                gc.setStroke(colorPicker.getValue());
+                gc.setLineWidth(lineWidthSlider.getValue());
+            }
             addLayer();
             updateZoom();
             logger.info("Image loaded from: {}", originalPath);
@@ -517,7 +529,7 @@ public class MainController {
             redoStack.clear();
         } else {
             logger.warn("No image file selected");
-            showNotification("Warning", "No image file selected");
+            showNotification("Warning", resources.getString("notification_no_image_file_selected"));
         }
     }
 
@@ -543,18 +555,18 @@ public class MainController {
                     ImageIO.write(bufferedImage, format, file);
                     logger.info("Image saved to: {}", file.getAbsolutePath());
                     unsavedChanges = false;
-                    showNotification("Success", "Image saved successfully to: " + file.getAbsolutePath());
+                    showNotification("Success", resources.getString("notification_image_saved_successfully") + file.getAbsolutePath());
                 } else {
                     logger.warn("No image to save");
-                    showNotification("Warning", "No image to save");
+                    showNotification("Warning", resources.getString("notification_no_image_to_save"));
                 }
             } catch (IOException e) {
                 logger.error("Error saving image", e);
-                showNotification("Error", "An error occurred while saving the image");
+                showNotification("Error", resources.getString("notification_error_saving_image"));
             }
         } else {
             logger.warn("No file selected for saving image");
-            showNotification("Warning", "No file selected for saving the image");
+            showNotification("Warning", resources.getString("notification_no_file_selected_for_saving"));
         }
     }
 
@@ -691,7 +703,7 @@ public class MainController {
         if (cropX.getText().isEmpty() || cropY.getText().isEmpty() ||
                 cropWidth.getText().isEmpty() || cropHeight.getText().isEmpty()) {
             // Вывод уведомления об ошибке, если поля не заполнены
-            showNotification("Error", "All fields must be filled");
+            showNotification("Error", resources.getString("notification_all_fields_required"));
             return;
         }
 
@@ -704,7 +716,7 @@ public class MainController {
             height = Double.parseDouble(cropHeight.getText());
         } catch (NumberFormatException e) {
             // Вывод уведомления об ошибке, если введены некорректные значения
-            showNotification("Error", "Invalid input. Please enter numeric values.");
+            showNotification("Error", resources.getString("notification_invalid_input_numeric"));
             return;
         }
 
@@ -713,7 +725,7 @@ public class MainController {
                 x + width > (int) imageView.getImage().getWidth() ||
                 y + height > (int) imageView.getImage().getHeight()) {
             // Вывод уведомления об ошибке в параметрах обрезания
-            showNotification("Error", "Crop zone does not have to go beyond the area of the image");
+            showNotification("Error", resources.getString("notification_crop_zone_exceeds_image"));
         } else {
             setUndo();
             // Применение обрезания
@@ -749,7 +761,7 @@ public class MainController {
         if (textX.getText().isEmpty() || textY.getText().isEmpty() ||
                 textInput.getText().isEmpty()) {
             // Вывод уведомления об ошибке, если поля не заполнены
-            showNotification("Error", "All fields must be filled");
+            showNotification("Error", resources.getString("notification_all_fields_required"));
             return;
         }
 
@@ -760,7 +772,7 @@ public class MainController {
             y = Double.parseDouble(textY.getText());
         } catch (NumberFormatException e) {
             // Вывод уведомления об ошибке, если введены некорректные значения
-            showNotification("Error", "Invalid input. Please enter numeric values.");
+            showNotification("Error", resources.getString("notification_invalid_input_numeric"));
             return;
         }
 
@@ -769,10 +781,9 @@ public class MainController {
                 x > (int) imageView.getImage().getWidth() ||
                 y > (int) imageView.getImage().getHeight()) {
             // Вывод уведомления об ошибке в параметрах обрезания
-            showNotification("Error", "Entry point does not have to go beyond the area of the image");
+            showNotification("Error", resources.getString("notification_entry_point_exceeds_image"));
         } else {
             // Сохранение до изменений
-            model.setLayerCanvasesModel(layerCanvases);
             setUndo();
 
             // Получение других параметров
@@ -809,7 +820,7 @@ public class MainController {
         if (stickerX.getText().isEmpty() || stickerY.getText().isEmpty() ||
                 stickerComboBox.getValue() == null) {
             // Вывод уведомления об ошибке, если поля не заполнены
-            showNotification("Error", "All fields must be filled");
+            showNotification("Error", resources.getString("notification_all_fields_required"));
             return;
         }
 
@@ -820,7 +831,7 @@ public class MainController {
             y = Double.parseDouble(stickerY.getText());
         } catch (NumberFormatException e) {
             // Вывод уведомления об ошибке, если введены некорректные значения
-            showNotification("Error", "Invalid input. Please enter numeric values.");
+            showNotification("Error", resources.getString("notification_invalid_input_numeric"));
             return;
         }
 
@@ -829,10 +840,9 @@ public class MainController {
                 x > (int) imageView.getImage().getWidth() ||
                 y > (int) imageView.getImage().getHeight()) {
             // Вывод уведомления об ошибке в параметрах обрезания
-            showNotification("Error", "Entry point does not have to go beyond the area of the image");
+            showNotification("Error", resources.getString("notification_entry_point_exceeds_image"));
         } else {
             // Сохранение до изменений
-            model.setLayerCanvasesModel(layerCanvases);
             setUndo();
 
             // Получение стикера
@@ -866,7 +876,7 @@ public class MainController {
         // Проверка на заполненные поля
         if (filterComboBox.getValue() == null) {
             // Вывод уведомления об ошибке, если поля не заполнены
-            showNotification("Error", "All fields must be filled");
+            showNotification("Error", resources.getString("notification_all_fields_required"));
             return;
         }
 
@@ -911,9 +921,36 @@ public class MainController {
     // Метод для кнопки добавления слоя
     @FXML
     private void addLayer() {
+        if (layers.size() == 1) {
+            Canvas existingCanvas = layers.getFirst().getCanvas();
+            SnapshotParameters params = new SnapshotParameters();
+            WritableImage snapshot = existingCanvas.snapshot(params, null);
+            PixelReader pixelReader = snapshot.getPixelReader();
+
+            boolean isEmpty = true;
+            for (int y = 0; y < snapshot.getHeight(); y++) {
+                for (int x = 0; x < snapshot.getWidth(); x++) {
+                    Color color = pixelReader.getColor(x, y);
+                    if (color.getOpacity() > 0) {
+                        isEmpty = false;
+                        break;
+                    }
+                }
+                if (!isEmpty) {
+                    break;
+                }
+            }
+
+            if (isEmpty) {
+                logger.info("The only layer is empty. Adding a new layer.");
+            } else {
+                showNotification("Error", resources.getString("notification_only_layer_not_empty"));
+                logger.info("The only layer is not empty. No new layer added.");
+                return;
+            }
+        }
+
         // Сохранение до изменений
-        model.setLayersModel(layers);
-        model.setLayerCanvasesModel(layerCanvases);
         setUndo();
 
         Canvas newCanvas = new Canvas(imageView.getImage().getWidth(), imageView.getImage().getHeight());
@@ -948,8 +985,6 @@ public class MainController {
         Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
         if (selectedLayer != null) {
             // Сохранение до изменений
-            model.setLayersModel(layers);
-            model.setLayerCanvasesModel(layerCanvases);
             setUndo();
 
             layersPane.getChildren().remove(selectedLayer.getCanvas());
@@ -969,13 +1004,16 @@ public class MainController {
             int index = layers.indexOf(selectedLayer);
             if (index > 0) {
                 // Сохранение до изменений
-                model.setLayersModel(layers);
-                model.setLayerCanvasesModel(layerCanvases);
                 setUndo();
 
                 layers.remove(index);
                 layers.add(index - 1, selectedLayer);
                 layersList.getSelectionModel().select(index - 1);
+
+                // Обновляем порядок слоев в layerCanvases
+                layerCanvases.remove(index);
+                layerCanvases.add(index - 1, selectedLayer.getCanvas());
+
                 updateLayerOrder();
                 logger.info("Layer moved up: {}", selectedLayer.getName());
             } else {
@@ -994,13 +1032,16 @@ public class MainController {
             int index = layers.indexOf(selectedLayer);
             if (index < layers.size() - 1) {
                 // Сохранение до изменений
-                model.setLayersModel(layers);
-                model.setLayerCanvasesModel(layerCanvases);
                 setUndo();
 
                 layers.remove(index);
                 layers.add(index + 1, selectedLayer);
                 layersList.getSelectionModel().select(index + 1);
+
+                // Обновляем порядок слоев в layerCanvases
+                layerCanvases.remove(index);
+                layerCanvases.add(index + 1, selectedLayer.getCanvas());
+
                 updateLayerOrder();
                 logger.info("Layer moved down: {}", selectedLayer.getName());
             } else {
@@ -1017,8 +1058,6 @@ public class MainController {
         Layer selectedLayer = layersList.getSelectionModel().getSelectedItem();
         if (selectedLayer != null) {
             // Сохранение до изменений
-            model.setLayersModel(layers);
-            model.setLayerCanvasesModel(layerCanvases);
             setUndo();
 
             selectedLayer.setVisible(!selectedLayer.isVisible());
@@ -1036,8 +1075,6 @@ public class MainController {
     private void mergeLayers() {
         if (layers.size() > 1) {
             // Сохранение до изменений
-            model.setLayersModel(layers);
-            model.setLayerCanvasesModel(layerCanvases);
             setUndo();
 
             Canvas mergedCanvas = new Canvas(imageView.getImage().getWidth(), imageView.getImage().getHeight());
@@ -1094,6 +1131,7 @@ public class MainController {
 
     // Метод для установки отмены изменений
     public void setUndo() {
+        model.setLayersModel(layers);
         // Сохранение текущего состояния в undoStack
         undoStack.push(model.clone());
         // Очистка содержимого redoStack
@@ -1134,13 +1172,39 @@ public class MainController {
     private void updateImageView() {
         imageView.setImage(model.getImageModel());
         layers = model.getLayersModel();
-        layerCanvases = model.getLayerCanvasesModel();
 
         // Обновление отображений
         layersList.refresh();
         layersList.setItems(layers);
-        updateLayerOrder();
+        logger.info("updateImageView - layersList updated");
+
+        layersPane.getChildren().clear();
+        layerCanvases = new ArrayList<>();
+        for (int i = layers.size() - 1; i >= 0; i--) {
+            // Инициализация GraphicsContext для рисования на Canvas
+            gc = layers.get(i).getCanvas().getGraphicsContext2D();
+            if (currentMode.equals("DRAW")) {
+                gc.setStroke(colorPicker.getValue());
+                gc.setLineWidth(lineWidthSlider.getValue());
+            } else {
+                gc.setStroke(Color.WHITE);
+                gc.setLineWidth(2);
+            }
+
+            // Установка обработчиков событий мыши для рисования
+            layers.get(i).getCanvas().addEventHandler(MouseEvent.MOUSE_PRESSED, this::canvasEventMousePressed);
+            layers.get(i).getCanvas().addEventHandler(MouseEvent.MOUSE_DRAGGED, this::canvasEventMouseDragged);
+            layers.get(i).getCanvas().addEventHandler(MouseEvent.MOUSE_RELEASED, this::canvasEventMouseReleased);
+            // Установка обработчика мыши для обновления координат
+            layers.get(i).getCanvas().addEventHandler(MouseEvent.MOUSE_MOVED, this::canvasEventMouseMoved);
+
+            layerCanvases.add(layers.get(i).getCanvas());
+            layersPane.getChildren().add(layers.get(i).getCanvas());
+        }
+
+        logger.info("updateImageView - EventHandlers updated");
         updateZoom();
+        logger.info("updateImageView - ImageView updated");
     }
 
     // Метод для кнопки увеличения масштаба

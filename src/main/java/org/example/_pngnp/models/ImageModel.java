@@ -5,9 +5,6 @@ package org.example._pngnp.models;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
@@ -19,8 +16,6 @@ import org.example._pngnp.classes.Layer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
 
 // Объявление класса ImageModel
 public class ImageModel implements Cloneable {
@@ -30,7 +25,6 @@ public class ImageModel implements Cloneable {
 
     // Приватное поле для хранения изменений
     private ObservableList<Layer> layersModel;
-    private List<Canvas> layerCanvasesModel;
 
     // Логгер для записи логов
     private static final Logger logger = LogManager.getLogger(ImageModel.class);
@@ -69,18 +63,6 @@ public class ImageModel implements Cloneable {
     public void setLayersModel(ObservableList<Layer> layersModel) {
         logger.info("Setting current layers");
         this.layersModel = layersModel;
-    }
-
-    // Метод для получения изменений Canvas
-    public List<Canvas> getLayerCanvasesModel() {
-        logger.info("Getting current layerCanvases");
-        return layerCanvasesModel;
-    }
-
-    // Метод для установки изменений Canvas
-    public void setLayerCanvasesModel(List<Canvas> layerCanvasesModel) {
-        logger.info("Setting current layerCanvases");
-        this.layerCanvasesModel = layerCanvasesModel;
     }
 
     // Применение обрезки к изображению
@@ -269,18 +251,6 @@ public class ImageModel implements Cloneable {
             clone.layersModel = FXCollections.observableArrayList();
             for (Layer layer : layersModel) {
                 clone.layersModel.add(layer.clone());
-            }
-
-            // Клонирование списка layerCanvases
-            clone.layerCanvasesModel = new ArrayList<>();
-            // Сохранение всех canvas с прозрачным фоном
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            for (Canvas layerCanvas : layerCanvasesModel) {
-                Canvas clonedCanvas = new Canvas();
-                GraphicsContext gc = clonedCanvas.getGraphicsContext2D();
-                gc.drawImage(layerCanvas.snapshot(params, null), 0, 0);
-                clone.layerCanvasesModel.add(clonedCanvas);
             }
 
             logger.info("ImageModel cloned successfully");

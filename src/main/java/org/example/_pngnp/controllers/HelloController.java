@@ -136,7 +136,7 @@ public class HelloController {
 
             MainController controller = loader.getController();
             // Передача ссылки на главное окно в контроллер
-            controller.setPrimaryStage(primaryStage);
+            controller.setPrimaryStage(primaryStage, resources);
             ImageModel model = new ImageModel();
             // Передача модели в контроллер
             controller.setModel(model);
