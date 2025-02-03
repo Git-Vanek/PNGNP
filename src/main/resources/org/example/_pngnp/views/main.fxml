@@ -84,9 +84,6 @@
                 <!-- Настройки режима текста -->
                 <VBox styleClass="settings-vbox" fx:id="settings_text_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%text" />
-                    <Label styleClass="label_FFFFFF" text="%entry_point" />
-                    <TextField fx:id="textX" promptText="%x" />
-                    <TextField fx:id="textY" promptText="%y" />
                     <Label styleClass="label_FFFFFF" text="%enter_text" />
                     <TextField fx:id="textInput" promptText="%enter_text" />
                     <Label styleClass="label_FFFFFF" text="%color" />
@@ -94,17 +91,22 @@
                     <Label styleClass="label_FFFFFF" text="%line_width" />
                     <Slider fx:id="textSizeSlider" min="10" max="50" value="20"
                             showTickMarks="true" showTickLabels="true" />
-                    <Button styleClass="button" text="%add_text" onAction="#addText" />
+                    <RadioButton fx:id="onClickText" styleClass="label_FFFFFF" text="%add_text_on_click"/>
+                    <Label styleClass="label_FFFFFF" text="%entry_point" />
+                    <TextField fx:id="textX" promptText="%x" />
+                    <TextField fx:id="textY" promptText="%y" />
+                    <Button styleClass="button" text="%add_text_by_point" onAction="#addTextByPoint" />
                 </VBox>
                 <!-- Настройки режима стикеров -->
                 <VBox styleClass="settings-vbox" fx:id="settings_stickers_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%stickers" />
+                    <Label styleClass="label_FFFFFF" text="%selection" />
+                    <ComboBox fx:id="stickerComboBox" />
+                    <RadioButton fx:id="onClickSticker" styleClass="label_FFFFFF" text="%add_sticker_on_click"/>
                     <Label styleClass="label_FFFFFF" text="%entry_point" />
                     <TextField fx:id="stickerX" promptText="%x" />
                     <TextField fx:id="stickerY" promptText="%y" />
-                    <Label styleClass="label_FFFFFF" text="%selection" />
-                    <ComboBox fx:id="stickerComboBox" />
-                    <Button styleClass="button" text="%add_stickers" onAction="#add_stickers" />
+                    <Button styleClass="button" text="%add_stickers_by_point" onAction="#addStickersByPoint" />
                 </VBox>
                 <!-- Настройки режима фильтров -->
                 <VBox styleClass="settings-vbox" fx:id="settings_filters_mode" visible="false">

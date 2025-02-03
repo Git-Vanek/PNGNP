@@ -198,6 +198,12 @@ public class MainController {
     private Slider textSizeSlider;
 
     @FXML
+    private RadioButton onClickText;
+
+    @FXML
+    private RadioButton onClickSticker;
+
+    @FXML
     private ComboBox<String> stickerComboBox;
 
     @FXML
@@ -263,7 +269,8 @@ public class MainController {
         setButtonImage(button_stickers_mode, "/org/example/_pngnp/images/stickers.png");
         setButtonImage(button_filters_mode, "/org/example/_pngnp/images/filters.png");
         setButtonImage(button_layers_mode, "/org/example/_pngnp/images/layers.png");
-        setButtonImage(button_brightness_and_contrast_mode, "/org/example/_pngnp/images/brightness_and_contrast.png");
+        setButtonImage(button_brightness_and_contrast_mode,
+                "/org/example/_pngnp/images/brightness_and_contrast.png");
         setButtonImage(button_toggle_mode, "/org/example/_pngnp/images/toggle.png");
         setButtonImage(button_text_mode, "/org/example/_pngnp/images/text.png");
 
@@ -272,7 +279,8 @@ public class MainController {
 
         // Установка обработчиков для поля ввода масштаба
         if (zoomTextField != null) {
-            zoomTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+            zoomTextField.textProperty().addListener((observable,
+                                                      oldValue, newValue) -> {
                 try {
                     double newZoomLevel = Double.parseDouble(newValue.replace("%", "")) / 100.0;
                     if (newZoomLevel > 0) {
@@ -435,10 +443,11 @@ public class MainController {
 
     // Обработчик нажатия мыши на Canvas
     private void canvasEventMousePressed(MouseEvent event) {
-        if (currentMode.equals("DRAW")) {
-            startDrawing(event);
-        } else {
-            defaultPressed(event);
+        switch (currentMode) {
+            case "DRAW" -> startDrawing(event);
+            case "TEXT" -> startAddText(event);
+            case "STICKERS" -> startAddSticker(event);
+            default -> defaultPressed(event);
         }
     }
 
@@ -449,6 +458,20 @@ public class MainController {
 
         drawing = true;
         defaultPressed(event);
+    }
+
+    private void startAddText(MouseEvent event) {
+        if (onClickText.isSelected()) {
+            defaultPressed(event);
+            addText(lastX, lastY);
+        }
+    }
+
+    private void startAddSticker(MouseEvent event) {
+        if (onClickSticker.isSelected()) {
+            defaultPressed(event);
+            addStickers(lastX, lastY);
+        }
     }
 
     // Метод получения начальных координат
@@ -555,7 +578,8 @@ public class MainController {
                     ImageIO.write(bufferedImage, format, file);
                     logger.info("Image saved to: {}", file.getAbsolutePath());
                     unsavedChanges = false;
-                    showNotification("Success", resources.getString("notification_image_saved_successfully") + file.getAbsolutePath());
+                    showNotification("Success", resources.
+                            getString("notification_image_saved_successfully") + file.getAbsolutePath());
                 } else {
                     logger.warn("No image to save");
                     showNotification("Warning", resources.getString("notification_no_image_to_save"));
@@ -747,6 +771,7 @@ public class MainController {
         textX.setText("");
         textY.setText("");
         textInput.setText("");
+        onClickText.setSelected(false);
         textColorPicker.setValue(Color.WHITE);
         textSizeSlider.setValue(2);
 
@@ -756,10 +781,9 @@ public class MainController {
 
     // Метод для кнопки добавления текста
     @FXML
-    private void addText() {
+    private void addTextByPoint() {
         // Проверка на заполненные поля
-        if (textX.getText().isEmpty() || textY.getText().isEmpty() ||
-                textInput.getText().isEmpty()) {
+        if (textX.getText().isEmpty() || textY.getText().isEmpty()) {
             // Вывод уведомления об ошибке, если поля не заполнены
             showNotification("Error", resources.getString("notification_all_fields_required"));
             return;
@@ -783,20 +807,30 @@ public class MainController {
             // Вывод уведомления об ошибке в параметрах обрезания
             showNotification("Error", resources.getString("notification_entry_point_exceeds_image"));
         } else {
-            // Сохранение до изменений
-            setUndo();
-
-            // Получение других параметров
-            String text = textInput.getText();
-            Color color = textColorPicker.getValue();
-            double size = textSizeSlider.getValue();
-
-            // Вставка текста
-            gc.setFill(color);
-            gc.setFont(new Font(size));
-            gc.fillText(text, x, y);
-            logger.info("Text has been added");
+            addText(x, y);
         }
+    }
+
+    private void addText(double x, double y) {
+        // Проверка на заполненные поля
+        if (textInput.getText().isEmpty()) {
+            // Вывод уведомления об ошибке, если поля не заполнены
+            showNotification("Error", resources.getString("notification_all_fields_required"));
+            return;
+        }
+        // Сохранение до изменений
+        setUndo();
+
+        // Получение других параметров
+        String text = textInput.getText();
+        Color color = textColorPicker.getValue();
+        double size = textSizeSlider.getValue();
+
+        // Вставка текста
+        gc.setFill(color);
+        gc.setFont(new Font(size));
+        gc.fillText(text, x, y);
+        logger.info("Text has been added");
     }
 
     // Метод для кнопки переключения на режим работы со стикерами
@@ -808,6 +842,7 @@ public class MainController {
         // Очистка значений
         stickerX.setText("");
         stickerY.setText("");
+        onClickSticker.setSelected(false);
 
         // Отображение настроек мода
         selectButton(button_stickers_mode, settings_stickers_mode);
@@ -815,10 +850,9 @@ public class MainController {
 
     // Метод для кнопки добавления стикера
     @FXML
-    private void add_stickers() {
+    private void addStickersByPoint() {
         // Проверка на заполненные поля
-        if (stickerX.getText().isEmpty() || stickerY.getText().isEmpty() ||
-                stickerComboBox.getValue() == null) {
+        if (stickerX.getText().isEmpty() || stickerY.getText().isEmpty()) {
             // Вывод уведомления об ошибке, если поля не заполнены
             showNotification("Error", resources.getString("notification_all_fields_required"));
             return;
@@ -842,20 +876,30 @@ public class MainController {
             // Вывод уведомления об ошибке в параметрах обрезания
             showNotification("Error", resources.getString("notification_entry_point_exceeds_image"));
         } else {
-            // Сохранение до изменений
-            setUndo();
-
-            // Получение стикера
-            String selectedSticker = stickerComboBox.getValue();
-            Image stickerImage = new Image(Objects.requireNonNull(getClass().
-                    getResourceAsStream("/org/example/_pngnp/stickers/" + selectedSticker + ".png")));
-
-            // Вставка стикера
-            gc.drawImage(stickerImage, x, y);
-            logger.info("Sticker has been added");
+            addStickers(x, y);
         }
     }
 
+    private void addStickers(Double x, Double y) {
+        // Проверка на заполненные поля
+        if (stickerComboBox.getValue() == null) {
+            // Вывод уведомления об ошибке, если поля не заполнены
+            showNotification("Error", resources.getString("notification_all_fields_required"));
+            return;
+        }
+
+        // Сохранение до изменений
+        setUndo();
+
+        // Получение стикера
+        String selectedSticker = stickerComboBox.getValue();
+        Image stickerImage = new Image(Objects.requireNonNull(getClass().
+                getResourceAsStream("/org/example/_pngnp/stickers/" + selectedSticker + ".png")));
+
+        // Вставка стикера
+        gc.drawImage(stickerImage, x, y);
+        logger.info("Sticker has been added");
+    }
 
     // Метод для кнопки переключения на режим работы с фильтрами
     @FXML
@@ -924,6 +968,7 @@ public class MainController {
         if (layers.size() == 1) {
             Canvas existingCanvas = layers.getFirst().getCanvas();
             SnapshotParameters params = new SnapshotParameters();
+            params.setFill(Color.TRANSPARENT);
             WritableImage snapshot = existingCanvas.snapshot(params, null);
             PixelReader pixelReader = snapshot.getPixelReader();
 
@@ -941,7 +986,7 @@ public class MainController {
                 }
             }
 
-            if (isEmpty) {
+            if (!isEmpty) {
                 logger.info("The only layer is empty. Adding a new layer.");
             } else {
                 showNotification("Error", resources.getString("notification_only_layer_not_empty"));
