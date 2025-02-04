@@ -161,23 +161,35 @@ public class ImageModel implements Cloneable {
     }
 
     // Приватный метод для применения фильтра к изображению
-    private Image applyFilter(Image image, FilterFunction filterFunction) {
+    private Image applyFilter(Image currentImage, FilterFunction filterFunction) {
         // Получение ширины и высоты изображения
-        int width = (int) image.getWidth();
-        int height = (int) image.getHeight();
+        int width = (int) currentImage.getWidth();
+        int height = (int) currentImage.getHeight();
 
         // Создание нового изображения для записи измененных пикселей
         WritableImage newImage = new WritableImage(width, height);
 
         // Получение объектов для чтения и записи пикселей
-        PixelReader reader = image.getPixelReader();
+        PixelReader reader = currentImage.getPixelReader();
+
+        // Устанавливаем прозрачный фон для newImage
         PixelWriter writer = newImage.getPixelWriter();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                writer.setColor(x, y, Color.TRANSPARENT);
+            }
+        }
 
         // Проход по всем пикселям изображения
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 // Чтение цвета текущего пикселя
                 Color color = reader.getColor(x, y);
+
+                // Если пиксель прозрачный, пропускаем его
+                if (color.getOpacity() == 0) {
+                    continue;
+                }
 
                 // Применение фильтра к цвету пикселя
                 Color newColor = filterFunction.apply(x, y, color);
@@ -188,7 +200,7 @@ public class ImageModel implements Cloneable {
         }
 
         // Возврат нового изображения с примененным фильтром
-        logger.info("Filter applied successfully");
+        System.out.println("Filter applied successfully");
         return newImage;
     }
 
@@ -200,17 +212,25 @@ public class ImageModel implements Cloneable {
     }
 
     // Метод применения яркости и контраста к изображению
-    public Image adjustBrightnessAndContrast(double brightness, double contrast) {
-        int width = (int) imageModel.getWidth();
-        int height = (int) imageModel.getHeight();
+    public Image adjustBrightnessAndContrast(Image currentImage, double brightness, double contrast) {
+        int width = (int) currentImage.getWidth();
+        int height = (int) currentImage.getHeight();
         WritableImage adjustedImage = new WritableImage(width, height);
-        PixelReader pixelReader = imageModel.getPixelReader();
+        PixelReader pixelReader = currentImage.getPixelReader();
         PixelWriter pixelWriter = adjustedImage.getPixelWriter();
 
         double factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
+                Color color = pixelReader.getColor(x, y);
+
+                // Проверка на прозрачный фон
+                if (color.getOpacity() == 0) {
+                    pixelWriter.setColor(x, y, Color.TRANSPARENT);
+                    continue;
+                }
+
                 int argb = pixelReader.getArgb(x, y);
                 int newArgb = getNewArgb(brightness, argb, factor);
                 pixelWriter.setArgb(x, y, newArgb);
@@ -218,7 +238,7 @@ public class ImageModel implements Cloneable {
         }
 
         // Возврат нового изображения с примененными яркостью и контрастом
-        logger.info("Brightness And Contrast applied successfully");
+        System.out.println("Brightness And Contrast applied successfully");
         return adjustedImage;
     }
 

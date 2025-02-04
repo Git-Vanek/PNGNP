@@ -112,8 +112,10 @@
                 <VBox styleClass="settings-vbox" fx:id="settings_filters_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%filters" />
                     <Label styleClass="label_FFFFFF" text="%selection" />
-                    <ComboBox fx:id="filterComboBox" onAction="#setFilter" />
-                    <Button styleClass="button" text="%deleteFilter" onAction="#deleteFilter" />
+                    <ComboBox fx:id="filterComboBox" />
+                    <RadioButton fx:id="filterForImage" styleClass="label_FFFFFF" text="%image"/>
+                    <RadioButton fx:id="filterForLayer" styleClass="label_FFFFFF" text="%layers"/>
+                    <RadioButton fx:id="filterForAll" styleClass="label_FFFFFF" text="%all"/>
                     <Button styleClass="button" text="%applyFilter" onAction="#applyFilter" />
                 </VBox>
                 <!-- Настройки режима слоев -->
@@ -130,6 +132,9 @@
                 <!-- Настройки режима яркости и контраста -->
                 <VBox styleClass="settings-vbox" fx:id="settings_brightness_and_contrast_mode" visible="false">
                     <Label styleClass="label_FFFFFF" text="%brightness" />
+                    <RadioButton fx:id="forImage" styleClass="label_FFFFFF" text="%image"/>
+                    <RadioButton fx:id="forLayer" styleClass="label_FFFFFF" text="%layers"/>
+                    <RadioButton fx:id="forAll" styleClass="label_FFFFFF" text="%all"/>
                     <Slider fx:id="brightnessSlider" min="-100" showTickMarks="true"
                             showTickLabels="true" onMouseReleased="#applyBrightnessAndContrast" />
                     <Label styleClass="label_FFFFFF" text="%contrast" />

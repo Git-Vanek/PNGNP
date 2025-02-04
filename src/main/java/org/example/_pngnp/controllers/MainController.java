@@ -204,6 +204,24 @@ public class MainController {
     private RadioButton onClickSticker;
 
     @FXML
+    private RadioButton filterForImage;
+
+    @FXML
+    private RadioButton filterForLayer;
+
+    @FXML
+    private RadioButton filterForAll;
+
+    @FXML
+    private RadioButton forImage;
+
+    @FXML
+    private RadioButton forLayer;
+
+    @FXML
+    private RadioButton forAll;
+
+    @FXML
     private ComboBox<String> stickerComboBox;
 
     @FXML
@@ -262,6 +280,22 @@ public class MainController {
     @FXML
     public void initialize() {
         logger.info("Initializing MainController");
+
+        // Создаем ToggleGroup
+        ToggleGroup toggleGroup = new ToggleGroup();
+
+        // Добавляем RadioButton в ToggleGroup
+        filterForImage.setToggleGroup(toggleGroup);
+        filterForLayer.setToggleGroup(toggleGroup);
+        filterForAll.setToggleGroup(toggleGroup);
+
+        // Создаем ToggleGroup
+        ToggleGroup toggleGroup2 = new ToggleGroup();
+
+        // Добавляем RadioButton в ToggleGroup
+        forImage.setToggleGroup(toggleGroup2);
+        forLayer.setToggleGroup(toggleGroup2);
+        forAll.setToggleGroup(toggleGroup2);
 
         // Установка иконок для кнопок
         setButtonImage(button_draw_mode, "/org/example/_pngnp/images/draw.png");
@@ -909,6 +943,9 @@ public class MainController {
 
         // Очистка значений
         filterComboBox.setValue("");
+        filterForImage.setSelected(false);
+        filterForLayer.setSelected(false);
+        filterForAll.setSelected(false);
 
         // Отображение настроек мода
         selectButton(button_filters_mode, settings_filters_mode);
@@ -916,40 +953,58 @@ public class MainController {
 
     // Метод применения фильтра к изображению
     @FXML
-    private void setFilter() {
+    private void applyFilter() {
         // Проверка на заполненные поля
-        if (filterComboBox.getValue() == null) {
+        if (Objects.equals(filterComboBox.getValue(), "") || (!filterForImage.isSelected() &&
+                !filterForLayer.isSelected() && !filterForAll.isSelected())) {
             // Вывод уведомления об ошибке, если поля не заполнены
             showNotification("Error", resources.getString("notification_all_fields_required"));
             return;
         }
 
-        // Применение фильтра
-        String selectedFilter = filterComboBox.getValue();
-        Image filteredImage = model.setFilter(imageView.getImage(), selectedFilter);
-
-        // Обновление изображения
-        imageView.setImage(filteredImage);
-    }
-
-    // Метод для кнопки удаления фильтра
-    @FXML
-    private void deleteFilter() {
-        filterComboBox.setValue("");
-        // Обновление изображения
-        imageView.setImage(model.getImageModel());
-    }
-
-    // Метод для установки фильтра
-    @FXML
-    private void applyFilter() {
         // Сохранение до изменений
         setUndo();
 
-        filterComboBox.setValue("");
+        // Применение фильтра
+        String selectedFilter = filterComboBox.getValue();
+        if (filterForImage.isSelected()) {
+            setImageFilter(selectedFilter);
+        } else if (filterForLayer.isSelected()) {
+            // Применение фильтра для верхнего слоя
+            filterLayers(selectedFilter);
+        } else if (filterForAll.isSelected()){
+            // Применение фильтра для изображения и всех слоев
+            mergeLayers();
+            filterLayers(selectedFilter);
+            setImageFilter(selectedFilter);
+        }
+    }
 
+    private void setImageFilter(String selectedFilter) {
+        // Применение фильтра для изображения
+        Image filteredImage = model.setFilter(imageView.getImage(), selectedFilter);
+        // Обновление изображения
+        imageView.setImage(filteredImage);
         // Установка изображения с фильтром
         model.setImageModel(imageView.getImage());
+    }
+
+    // Метод для применения фильтра к слою
+    private void filterLayers(String selectedFilter) {
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        WritableImage snapshot = layerCanvases.getFirst().snapshot(params, null);
+
+        // Применение фильтра для текущего слоя
+        Image filteredImage = model.setFilter(snapshot, selectedFilter);
+
+        // Обновление layersPane
+        GraphicsContext filteredGc = layers.getFirst().getCanvas().getGraphicsContext2D();
+        filteredGc.drawImage(filteredImage, 0, 0);
+        updateLayerOrder();
+
+        // Установка фильтра для изображения и всех слоев
+        model.setLayersModel(layers);
     }
 
     // Метод для кнопки переключения на режим работы со слоями
@@ -1158,20 +1213,70 @@ public class MainController {
         currentMode = "BRIGHTNESS_AND_CONTRAST";
         logger.info("Switched to Brightness and Contrast Mode");
 
+        // Очистка значений
+        brightnessSlider.setValue(0);
+        contrastSlider.setValue(0);
+        forImage.setSelected(false);
+        forLayer.setSelected(false);
+        forAll.setSelected(false);
+
         // Отображение настроек мода
         selectButton(button_brightness_and_contrast_mode, settings_brightness_and_contrast_mode);
     }
 
     @FXML
     private void applyBrightnessAndContrast() {
+        // Проверка на заполненные поля
+        if ((!forImage.isSelected() && !forLayer.isSelected() && !forAll.isSelected())) {
+            // Вывод уведомления об ошибке, если поля не заполнены
+            showNotification("Error", resources.getString("notification_all_fields_required"));
+            return;
+        }
+
+        // Сохранение до изменений
+        setUndo();
+
         double brightness = brightnessSlider.getValue();
         double contrast = contrastSlider.getValue();
-
         // Применение параметров
-        Image adjustedImage = model.adjustBrightnessAndContrast(brightness, contrast);
+        if (forImage.isSelected()) {
+            setAbs(brightness, contrast);
+        } else if (forLayer.isSelected()) {
+            // Применение параметров для верхнего слоя
+            adsLayers(brightness, contrast);
+        } else if (forAll.isSelected()){
+            // Применение параметров для изображения и всех слоев
+            mergeLayers();
+            adsLayers(brightness, contrast);
+            setAbs(brightness, contrast);
+        }
+    }
 
+    private void setAbs(double brightness, double contrast) {
+        // Применение параметров для изображения
+        Image adjustedImage = model.adjustBrightnessAndContrast(imageView.getImage(), brightness, contrast);
         // Обновление изображения
         imageView.setImage(adjustedImage);
+        // Установка изображения с параметрами
+        model.setImageModel(imageView.getImage());
+    }
+
+    // Метод для применения параметров к слою
+    private void adsLayers(double brightness, double contrast) {
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        WritableImage snapshot = layerCanvases.getFirst().snapshot(params, null);
+
+        // Применение параметров для текущего слоя
+        Image adjustedImage = model.adjustBrightnessAndContrast(snapshot, brightness, contrast);
+
+        // Обновление layersPane
+        GraphicsContext absGc = layers.getFirst().getCanvas().getGraphicsContext2D();
+        absGc.drawImage(adjustedImage, 0, 0);
+        updateLayerOrder();
+
+        // Установка параметров для изображения и всех слоев
+        model.setLayersModel(layers);
     }
 
     // Метод для установки отмены изменений
@@ -1297,6 +1402,8 @@ public class MainController {
 
         // Обновление масштабов всех canvas
         for (Canvas canvas : layerCanvases) {
+            canvas.setHeight(imageView.getImage().getHeight());
+            canvas.setWidth(imageView.getImage().getWidth());
             canvas.setScaleX(zoomLevel);
             canvas.setScaleY(zoomLevel);
         }
